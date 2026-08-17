@@ -1225,6 +1225,35 @@ if('serviceWorker' in navigator){
 }
 
 init();
+
+const shotMode = new URLSearchParams(location.search).get('shot');
+if(shotMode === 'puzzle' || shotMode === 'sanctuary'){
+  state.cutsceneShown = true; state.helpShown = true;
+  document.getElementById('cutscene').classList.add('hidden');
+  hideModal('helpModal');
+  if(shotMode === 'sanctuary'){
+    state.warmth = 1200;
+    ['milo','cleo','leo'].forEach(id=>state.cats[id].recruited=true);
+    document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+    document.querySelector('.tab[data-tab="sanctuary"]').classList.add('active');
+    document.getElementById('puzzleView').classList.remove('active');
+    document.getElementById('sanctuaryView').classList.add('active');
+    renderAll();
+  } else {
+    for(let i=0;i<6;i++){
+      let mv=null;
+      for(let ti=0; ti<3 && !mv; ti++){
+        const p=state.tray[ti]; if(!p) continue;
+        for(let r=0;r<8 && !mv;r++) for(let c=0;c<8 && !mv;c++) if(canPlace(p.shapeIdx,r,c)) mv={ti,r,c};
+      }
+      if(!mv) break;
+      placePieceAt(mv.ti, mv.r, mv.c);
+    }
+    Object.keys(state.cats).forEach(id=>{ if(state.cats[id].recruited) state.cats[id].gauge=Math.random()<0.4?100:Math.floor(Math.random()*90); });
+    state.cats.milo.gauge = 100;
+    renderAll();
+  }
+}
 })();
 </script>
 </body>
