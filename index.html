@@ -383,7 +383,7 @@ function load(){
 
 /* ---------------- audio ---------------- */
 let actx=null;
-function ctx(){ if(!actx){ try{ actx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } return actx; }
+function ctx(){ if(!actx){ try{ actx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } if(actx && actx.state==='suspended'){ actx.resume().catch(()=>{}); } return actx; }
 function tone(freq,dur,type,gain,delay){
   if(!state.soundOn) return;
   const c = ctx(); if(!c) return;
@@ -405,6 +405,77 @@ const SND = {
   error:()=>tone(160,0.15,'square',0.1),
   levelup:()=>{ [523,659,784,1046].forEach((f,i)=>tone(f,0.22,'triangle',0.13,i*0.09)); },
 };
+
+/* ---------------- music (8-bit style, fully synthesized) ---------------- */
+const NOTE = (n) => 261.63 * Math.pow(2, n/12);
+let musicTimer = null, musicId = 0, currentMood = null;
+function playMusic(track){
+  const myId = ++musicId;
+  const beatSec = 60/track.bpm;
+  const totalBeats = track.voices[0].reduce((s,n)=>s+n[1],0);
+  function loop(){
+    if(myId !== musicId) return;
+    if(!state.soundOn){ musicTimer = setTimeout(loop, 400); return; }
+    const c = ctx(); if(!c){ musicTimer = setTimeout(loop, 400); return; }
+    const t0 = c.currentTime + 0.05;
+    track.voices.forEach(voice=>{
+      let t = t0;
+      voice.forEach(([semi,beats,wave,gain])=>{
+        const dur = beats*beatSec;
+        if(semi!==null){
+          const osc = c.createOscillator(), g = c.createGain();
+          osc.type = wave||'triangle';
+          osc.frequency.setValueAtTime(NOTE(semi), t);
+          g.gain.setValueAtTime(0,t);
+          g.gain.linearRampToValueAtTime(gain||0.04, t+0.03);
+          g.gain.exponentialRampToValueAtTime(0.0001, t+dur*0.95);
+          osc.connect(g); g.connect(c.destination);
+          osc.start(t); osc.stop(t+dur+0.02);
+        }
+        t += dur;
+      });
+    });
+    musicTimer = setTimeout(loop, totalBeats*beatSec*1000 - 50);
+  }
+  loop();
+}
+function stopMusic(){ musicId++; clearTimeout(musicTimer); }
+function setMood(mood){
+  if(mood===currentMood) return;
+  currentMood = mood;
+  if(mood==='sad') playMusic(MUSIC_INTRO_SAD);
+  else if(mood==='bright') playMusic(MUSIC_INTRO_BRIGHT);
+  else if(mood==='gameplay') playMusic(MUSIC_GAMEPLAY);
+  else stopMusic();
+}
+const MUSIC_INTRO_SAD = {bpm:64, voices:[[
+  [-5,2,'sine',0.05],[-7,1,'sine',0.05],[-9,1,'sine',0.045],[null,1],
+  [-12,2,'sine',0.045],[-9,1,'sine',0.045],[-7,1,'sine',0.05],[null,0.5],
+  [-5,2,'sine',0.055],[null,1],
+  [-7,1,'sine',0.045],[-9,1,'sine',0.04],[-14,2.5,'sine',0.04],[null,2],
+]]};
+const MUSIC_INTRO_BRIGHT = {bpm:120, voices:[
+  [
+    [0,0.5,'triangle',0.05],[4,0.5,'triangle',0.05],[7,0.5,'triangle',0.05],[12,0.5,'triangle',0.055],
+    [11,0.5,'triangle',0.05],[9,0.5,'triangle',0.05],[7,0.5,'triangle',0.05],[4,0.5,'triangle',0.05],
+    [5,0.5,'triangle',0.05],[9,0.5,'triangle',0.05],[12,1,'triangle',0.06],
+    [null,0.5],[11,0.5,'triangle',0.05],[9,1,'triangle',0.05],
+  ],
+  [
+    [-12,1,'sine',0.032],[-12,1,'sine',0.028],[-5,1,'sine',0.032],[-5,1,'sine',0.028],
+    [-12,1,'sine',0.032],[-12,1,'sine',0.028],[-5,2,'sine',0.03],
+  ],
+]};
+const MUSIC_GAMEPLAY = {bpm:92, voices:[
+  [
+    [-9,1,'triangle',0.032],[-2,1,'triangle',0.032],[-5,1,'triangle',0.028],[0,1,'triangle',0.032],
+    [3,1.5,'triangle',0.036],[null,0.5],[0,1,'triangle',0.028],[-2,1,'triangle',0.028],
+    [-5,1,'triangle',0.028],[-9,1,'triangle',0.028],[-2,2,'triangle',0.032],[null,2],
+  ],
+  [
+    [-21,4,'sine',0.022],[-16,4,'sine',0.02],[-14,4,'sine',0.022],[-21,2,'sine',0.02],[null,0],
+  ],
+]};
 
 /* ---------------- level config ---------------- */
 function levelConfig(level){
@@ -1136,6 +1207,7 @@ function showSlide(i){
   slides[i].classList.add('active');
   document.getElementById('cutNext').textContent = i===slides.length-1 ? "Let's Begin" : 'Next';
   renderDots();
+  setMood(i===0 ? 'sad' : 'bright');
 }
 document.getElementById('cutNext').addEventListener('click', ()=>{
   if(slideIdx<slides.length-1){ slideIdx++; showSlide(slideIdx); }
@@ -1145,6 +1217,7 @@ document.getElementById('cutSkip').addEventListener('click', finishCutscene);
 function finishCutscene(){
   document.getElementById('cutscene').classList.add('hidden');
   state.cutsceneShown = true; save();
+  setMood('gameplay');
   if(!state.helpShown) showModal('helpModal');
 }
 
@@ -1209,6 +1282,7 @@ function init(){
 
   if(state.cutsceneShown){
     document.getElementById('cutscene').classList.add('hidden');
+    setMood('gameplay');
     if(!state.helpShown) showModal('helpModal');
   } else { showSlide(0); }
 
