@@ -19,13 +19,18 @@
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent; user-select:none;}
   html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#3a2a22;
     font-family:'Segoe UI Rounded','Trebuchet MS','Comic Sans MS',sans-serif;color:var(--text);}
-  #stage{position:fixed;top:0;left:0;width:100%;height:100%;
+  #stage{position:fixed;top:0;left:0;width:100%;height:100dvh;
     display:flex;align-items:center;justify-content:center;
     background:radial-gradient(circle at 50% 20%,#5a4033,#2c2019);}
   #app{position:relative;width:390px;height:844px;transform-origin:center center;
     background:linear-gradient(180deg,var(--bg1),var(--bg2) 60%,#FFE0C2);
     border-radius:28px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.5);
     display:flex;flex-direction:column;}
+  @media (max-width:640px){
+    #stage{background:var(--bg1);}
+    #app{width:100%;height:100%;border-radius:0;box-shadow:none;
+      padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);}
+  }
 
   /* topbar */
   #topbar{display:flex;align-items:center;gap:8px;padding:10px 12px;background:rgba(255,255,255,.55);
@@ -1344,6 +1349,7 @@ function init(){
 
 function fitApp(){
   const app = document.getElementById('app');
+  if(window.matchMedia('(max-width:640px)').matches){ app.style.transform = 'none'; return; }
   const scale = Math.min(window.innerWidth/390, window.innerHeight/844, 1.6);
   app.style.transform = 'scale('+scale+')';
 }
