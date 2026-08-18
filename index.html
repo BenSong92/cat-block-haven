@@ -408,15 +408,34 @@ const SND = {
 
 /* ---------------- music (8-bit style, fully synthesized) ---------------- */
 const NOTE = (n) => 261.63 * Math.pow(2, n/12);
-let musicTimer = null, musicId = 0, currentMood = null;
+let musicTimer = null, musicId = 0, currentMood = null, musicBus = null;
+function duckMusicBus(c){
+  if(!musicBus) return;
+  const now = c.currentTime;
+  try{
+    musicBus.gain.cancelScheduledValues(now);
+    musicBus.gain.setValueAtTime(musicBus.gain.value, now);
+    musicBus.gain.linearRampToValueAtTime(0.0001, now+0.06);
+  }catch(e){}
+}
+function freshMusicBus(c){
+  const bus = c.createGain();
+  bus.gain.setValueAtTime(0.0001, c.currentTime);
+  bus.gain.linearRampToValueAtTime(1, c.currentTime+0.15);
+  bus.connect(c.destination);
+  return bus;
+}
 function playMusic(track){
   const myId = ++musicId;
+  const c0 = ctx();
+  if(c0){ duckMusicBus(c0); musicBus = freshMusicBus(c0); }
   const beatSec = 60/track.bpm;
   const totalBeats = track.voices[0].reduce((s,n)=>s+n[1],0);
   function loop(){
     if(myId !== musicId) return;
     if(!state.soundOn){ musicTimer = setTimeout(loop, 400); return; }
     const c = ctx(); if(!c){ musicTimer = setTimeout(loop, 400); return; }
+    if(!musicBus) musicBus = freshMusicBus(c);
     const t0 = c.currentTime + 0.05;
     track.voices.forEach(voice=>{
       let t = t0;
@@ -429,7 +448,7 @@ function playMusic(track){
           g.gain.setValueAtTime(0,t);
           g.gain.linearRampToValueAtTime(gain||0.04, t+0.03);
           g.gain.exponentialRampToValueAtTime(0.0001, t+dur*0.95);
-          osc.connect(g); g.connect(c.destination);
+          osc.connect(g); g.connect(musicBus);
           osc.start(t); osc.stop(t+dur+0.02);
         }
         t += dur;
@@ -439,7 +458,10 @@ function playMusic(track){
   }
   loop();
 }
-function stopMusic(){ musicId++; clearTimeout(musicTimer); }
+function stopMusic(){
+  musicId++; clearTimeout(musicTimer);
+  if(actx) duckMusicBus(actx);
+}
 function setMood(mood){
   if(mood===currentMood) return;
   currentMood = mood;
@@ -448,20 +470,23 @@ function setMood(mood){
   else if(mood==='gameplay') playMusic(MUSIC_GAMEPLAY);
   else stopMusic();
 }
-/* Satie, Gymnopedie No.1 -- melody + the alternating G/D chord accompaniment that makes it recognizable */
-const MUSIC_INTRO_SAD = {bpm:58, voices:[
-  [ // melody
-    [9,1.5,'sine',0.05],[6,0.5,'sine',0.045],[4,1,'sine',0.045],[null,1],
-    [9,1,'sine',0.05],[7,0.5,'sine',0.045],[6,1,'sine',0.045],[null,0.5],
-    [4,1.5,'sine',0.05],[2,1,'sine',0.045],[null,1.5],
-    [6,1,'sine',0.045],[7,0.5,'sine',0.04],[9,1,'sine',0.045],[7,1,'sine',0.04],
-    [4,2,'sine',0.045],[null,2],
+/* Beethoven, Moonlight Sonata (Op.27 No.2, mvt.1) -- triplet arpeggio ostinato + pedal bass + the famous sustained melody note */
+const MUSIC_INTRO_SAD = {bpm:50, voices:[
+  [ // triplet arpeggio ostinato
+    [-11,0.34,'sine',0.035],[-4,0.33,'sine',0.03],[1,0.33,'sine',0.03],
+    [-11,0.34,'sine',0.035],[-4,0.33,'sine',0.03],[1,0.33,'sine',0.03],
+    [-11,0.34,'sine',0.035],[-4,0.33,'sine',0.03],[1,0.33,'sine',0.03],
+    [-11,0.34,'sine',0.035],[-4,0.33,'sine',0.03],[3,0.33,'sine',0.03],
+    [-14,0.34,'sine',0.035],[-9,0.33,'sine',0.03],[-1,0.33,'sine',0.03],
+    [-14,0.34,'sine',0.035],[-9,0.33,'sine',0.03],[-1,0.33,'sine',0.03],
+    [-11,0.34,'sine',0.035],[-4,0.33,'sine',0.03],[1,0.33,'sine',0.03],
+    [-11,0.34,'sine',0.035],[-4,0.33,'sine',0.03],[1,0.33,'sine',0.032],
   ],
-  [ // bass: G - D - G - D - G
-    [-5,4,'sine',0.026],[-10,4.5,'sine',0.023],[-5,4,'sine',0.026],[-10,3,'sine',0.021],[-5,3,'sine',0.023],
+  [ // the famous sustained "singing" melody note
+    [null,4],[8,3.5,'sine',0.032],[null,0.5],
   ],
-  [ // inner voice: F# / A colour tones (the dreamy maj7 feel)
-    [6,4,'triangle',0.017],[9,4.5,'triangle',0.015],[6,4,'triangle',0.017],[9,3,'triangle',0.014],[6,3,'triangle',0.015],
+  [ // low pedal bass
+    [-23,4,'sine',0.022],[-23,4,'sine',0.02],
   ],
 ]};
 /* Beethoven, Ode to Joy -- melody over a simple I-V hymn accompaniment */
@@ -485,24 +510,19 @@ const MUSIC_INTRO_BRIGHT = {bpm:126, voices:[
     [7,4,'triangle',0.022],[2,4,'triangle',0.02],[7,4,'triangle',0.022],[7,4,'triangle',0.022],
   ],
 ]};
-/* Bach, Prelude in C Major (BWV 846) -- broken-chord figure (I-ii-V-I) over its own sustained chords */
-const MUSIC_GAMEPLAY = {bpm:76, voices:[
-  [ // arpeggiated melody
-    [0,0.5,'triangle',0.03],[4,0.5,'triangle',0.028],[7,0.5,'triangle',0.028],[12,0.5,'triangle',0.03],
-    [7,0.5,'triangle',0.026],[4,0.5,'triangle',0.026],[0,0.5,'triangle',0.026],[4,0.5,'triangle',0.028],
-    [2,0.5,'triangle',0.028],[5,0.5,'triangle',0.026],[9,0.5,'triangle',0.026],[14,0.5,'triangle',0.028],
-    [9,0.5,'triangle',0.024],[5,0.5,'triangle',0.024],[2,0.5,'triangle',0.024],[5,0.5,'triangle',0.026],
-    [-5,0.5,'triangle',0.026],[-1,0.5,'triangle',0.024],[2,0.5,'triangle',0.024],[7,0.5,'triangle',0.026],
-    [2,0.5,'triangle',0.022],[-1,0.5,'triangle',0.022],[-5,0.5,'triangle',0.022],[-1,0.5,'triangle',0.024],
-    [0,0.5,'triangle',0.028],[4,0.5,'triangle',0.026],[7,0.5,'triangle',0.026],[12,0.5,'triangle',0.03],
-    [7,0.5,'triangle',0.024],[4,0.5,'triangle',0.024],[0,0.5,'triangle',0.024],[-12,0.75,'triangle',0.026],
-    [null,0.5],
+/* Mozart, Rondo Alla Turca (Piano Sonata No.11, mvt.3) -- bouncy A minor theme over a "Turkish band" open-fifth drone */
+const MUSIC_GAMEPLAY = {bpm:132, voices:[
+  [ // bouncy theme
+    [-1,0.5,'triangle',0.032],[0,0.5,'triangle',0.03],[2,0.5,'triangle',0.032],[0,0.5,'triangle',0.03],
+    [-1,0.5,'triangle',0.032],[-3,0.5,'triangle',0.03],[-1,1,'triangle',0.034],[null,0.5],
+    [2,0.5,'triangle',0.032],[4,0.5,'triangle',0.03],[5,0.5,'triangle',0.032],[4,0.5,'triangle',0.03],
+    [2,0.5,'triangle',0.032],[0,0.5,'triangle',0.03],[2,1,'triangle',0.034],[null,0.5],
   ],
-  [ // sustained bass root: C - Dm - G - C
-    [-12,4,'sine',0.024],[-10,4,'sine',0.021],[-5,4,'sine',0.024],[-12,4.75,'sine',0.023],
+  [ // open-fifth drone bass, janissary-band style
+    [-15,4.5,'sine',0.026],[-15,4.5,'sine',0.024],
   ],
-  [ // sustained third: E - F - B - E
-    [4,4,'triangle',0.017],[5,4,'triangle',0.015],[11,4,'triangle',0.017],[4,4.75,'triangle',0.016],
+  [ // fifth above the drone
+    [-8,4.5,'triangle',0.016],[-8,4.5,'triangle',0.015],
   ],
 ]};
 
