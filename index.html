@@ -448,37 +448,63 @@ function setMood(mood){
   else if(mood==='gameplay') playMusic(MUSIC_GAMEPLAY);
   else stopMusic();
 }
-/* Satie, Gymnopedie No.1 -- melodic phrase, single voice */
-const MUSIC_INTRO_SAD = {bpm:58, voices:[[
-  [9,1.5,'sine',0.05],[6,0.5,'sine',0.045],[4,1,'sine',0.045],[null,1],
-  [9,1,'sine',0.05],[7,0.5,'sine',0.045],[6,1,'sine',0.045],[null,0.5],
-  [4,1.5,'sine',0.05],[2,1,'sine',0.045],[null,1.5],
-  [6,1,'sine',0.045],[7,0.5,'sine',0.04],[9,1,'sine',0.045],[7,1,'sine',0.04],
-  [4,2,'sine',0.045],[null,2],
-]]};
-/* Beethoven, Ode to Joy -- single voice */
-const MUSIC_INTRO_BRIGHT = {bpm:126, voices:[[
-  [4,1,'triangle',0.055],[4,1,'triangle',0.055],[5,1,'triangle',0.055],[7,1,'triangle',0.06],
-  [7,1,'triangle',0.055],[5,1,'triangle',0.055],[4,1,'triangle',0.055],[2,1,'triangle',0.05],
-  [0,1,'triangle',0.05],[0,1,'triangle',0.05],[2,1,'triangle',0.05],[4,1,'triangle',0.055],
-  [4,1.5,'triangle',0.055],[2,0.5,'triangle',0.05],[2,2,'triangle',0.05],
-  [4,1,'triangle',0.055],[4,1,'triangle',0.055],[5,1,'triangle',0.055],[7,1,'triangle',0.06],
-  [7,1,'triangle',0.055],[5,1,'triangle',0.055],[4,1,'triangle',0.055],[2,1,'triangle',0.05],
-  [0,1,'triangle',0.05],[0,1,'triangle',0.05],[2,1,'triangle',0.05],[4,1,'triangle',0.055],
-  [2,1.5,'triangle',0.05],[0,0.5,'triangle',0.05],[0,2,'triangle',0.05],
-]]};
-/* Bach, Prelude in C Major (BWV 846) -- broken-chord figure, I-ii-V-I, single voice */
-const MUSIC_GAMEPLAY = {bpm:76, voices:[[
-  [0,0.5,'triangle',0.03],[4,0.5,'triangle',0.028],[7,0.5,'triangle',0.028],[12,0.5,'triangle',0.03],
-  [7,0.5,'triangle',0.026],[4,0.5,'triangle',0.026],[0,0.5,'triangle',0.026],[4,0.5,'triangle',0.028],
-  [2,0.5,'triangle',0.028],[5,0.5,'triangle',0.026],[9,0.5,'triangle',0.026],[14,0.5,'triangle',0.028],
-  [9,0.5,'triangle',0.024],[5,0.5,'triangle',0.024],[2,0.5,'triangle',0.024],[5,0.5,'triangle',0.026],
-  [-5,0.5,'triangle',0.026],[-1,0.5,'triangle',0.024],[2,0.5,'triangle',0.024],[7,0.5,'triangle',0.026],
-  [2,0.5,'triangle',0.022],[-1,0.5,'triangle',0.022],[-5,0.5,'triangle',0.022],[-1,0.5,'triangle',0.024],
-  [0,0.5,'triangle',0.028],[4,0.5,'triangle',0.026],[7,0.5,'triangle',0.026],[12,0.5,'triangle',0.03],
-  [7,0.5,'triangle',0.024],[4,0.5,'triangle',0.024],[0,0.5,'triangle',0.024],[-12,0.75,'triangle',0.026],
-  [null,0.5],
-]]};
+/* Satie, Gymnopedie No.1 -- melody + the alternating G/D chord accompaniment that makes it recognizable */
+const MUSIC_INTRO_SAD = {bpm:58, voices:[
+  [ // melody
+    [9,1.5,'sine',0.05],[6,0.5,'sine',0.045],[4,1,'sine',0.045],[null,1],
+    [9,1,'sine',0.05],[7,0.5,'sine',0.045],[6,1,'sine',0.045],[null,0.5],
+    [4,1.5,'sine',0.05],[2,1,'sine',0.045],[null,1.5],
+    [6,1,'sine',0.045],[7,0.5,'sine',0.04],[9,1,'sine',0.045],[7,1,'sine',0.04],
+    [4,2,'sine',0.045],[null,2],
+  ],
+  [ // bass: G - D - G - D - G
+    [-5,4,'sine',0.026],[-10,4.5,'sine',0.023],[-5,4,'sine',0.026],[-10,3,'sine',0.021],[-5,3,'sine',0.023],
+  ],
+  [ // inner voice: F# / A colour tones (the dreamy maj7 feel)
+    [6,4,'triangle',0.017],[9,4.5,'triangle',0.015],[6,4,'triangle',0.017],[9,3,'triangle',0.014],[6,3,'triangle',0.015],
+  ],
+]};
+/* Beethoven, Ode to Joy -- melody over a simple I-V hymn accompaniment */
+const MUSIC_INTRO_BRIGHT = {bpm:126, voices:[
+  [ // melody
+    [4,1,'triangle',0.055],[4,1,'triangle',0.055],[5,1,'triangle',0.055],[7,1,'triangle',0.06],
+    [7,1,'triangle',0.055],[5,1,'triangle',0.055],[4,1,'triangle',0.055],[2,1,'triangle',0.05],
+    [0,1,'triangle',0.05],[0,1,'triangle',0.05],[2,1,'triangle',0.05],[4,1,'triangle',0.055],
+    [4,1.5,'triangle',0.055],[2,0.5,'triangle',0.05],[2,2,'triangle',0.05],
+    [4,1,'triangle',0.055],[4,1,'triangle',0.055],[5,1,'triangle',0.055],[7,1,'triangle',0.06],
+    [7,1,'triangle',0.055],[5,1,'triangle',0.055],[4,1,'triangle',0.055],[2,1,'triangle',0.05],
+    [0,1,'triangle',0.05],[0,1,'triangle',0.05],[2,1,'triangle',0.05],[4,1,'triangle',0.055],
+    [2,1.5,'triangle',0.05],[0,0.5,'triangle',0.05],[0,2,'triangle',0.05],
+  ],
+  [ // bass: C - G - C - G - C - G - C - C
+    [-12,4,'sine',0.032],[-5,4,'sine',0.03],[-12,4,'sine',0.032],[-5,4,'sine',0.03],
+    [-12,4,'sine',0.032],[-5,4,'sine',0.03],[-12,4,'sine',0.032],[-12,4,'sine',0.032],
+  ],
+  [ // inner voice: fifth of each chord
+    [7,4,'triangle',0.022],[2,4,'triangle',0.02],[7,4,'triangle',0.022],[2,4,'triangle',0.02],
+    [7,4,'triangle',0.022],[2,4,'triangle',0.02],[7,4,'triangle',0.022],[7,4,'triangle',0.022],
+  ],
+]};
+/* Bach, Prelude in C Major (BWV 846) -- broken-chord figure (I-ii-V-I) over its own sustained chords */
+const MUSIC_GAMEPLAY = {bpm:76, voices:[
+  [ // arpeggiated melody
+    [0,0.5,'triangle',0.03],[4,0.5,'triangle',0.028],[7,0.5,'triangle',0.028],[12,0.5,'triangle',0.03],
+    [7,0.5,'triangle',0.026],[4,0.5,'triangle',0.026],[0,0.5,'triangle',0.026],[4,0.5,'triangle',0.028],
+    [2,0.5,'triangle',0.028],[5,0.5,'triangle',0.026],[9,0.5,'triangle',0.026],[14,0.5,'triangle',0.028],
+    [9,0.5,'triangle',0.024],[5,0.5,'triangle',0.024],[2,0.5,'triangle',0.024],[5,0.5,'triangle',0.026],
+    [-5,0.5,'triangle',0.026],[-1,0.5,'triangle',0.024],[2,0.5,'triangle',0.024],[7,0.5,'triangle',0.026],
+    [2,0.5,'triangle',0.022],[-1,0.5,'triangle',0.022],[-5,0.5,'triangle',0.022],[-1,0.5,'triangle',0.024],
+    [0,0.5,'triangle',0.028],[4,0.5,'triangle',0.026],[7,0.5,'triangle',0.026],[12,0.5,'triangle',0.03],
+    [7,0.5,'triangle',0.024],[4,0.5,'triangle',0.024],[0,0.5,'triangle',0.024],[-12,0.75,'triangle',0.026],
+    [null,0.5],
+  ],
+  [ // sustained bass root: C - Dm - G - C
+    [-12,4,'sine',0.024],[-10,4,'sine',0.021],[-5,4,'sine',0.024],[-12,4.75,'sine',0.023],
+  ],
+  [ // sustained third: E - F - B - E
+    [4,4,'triangle',0.017],[5,4,'triangle',0.015],[11,4,'triangle',0.017],[4,4.75,'triangle',0.016],
+  ],
+]};
 
 /* ---------------- level config ---------------- */
 function levelConfig(level){
