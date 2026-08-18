@@ -139,11 +139,13 @@
 
   /* cutscene */
   #cutscene{position:absolute;inset:0;background:#241812;z-index:100;display:flex;flex-direction:column;color:#fff;}
-  .slide{flex:1;display:none;flex-direction:column;align-items:center;justify-content:center;padding:30px;text-align:center;}
+  .slide{flex:1;display:none;flex-direction:column;align-items:center;justify-content:center;padding:26px 30px 10px;text-align:center;}
   .slide.active{display:flex;}
-  .slide .art{font-size:80px;margin-bottom:22px;filter:drop-shadow(0 8px 14px rgba(0,0,0,.4));}
+  .slide .art{width:172px;height:172px;margin-bottom:18px;filter:drop-shadow(0 10px 18px rgba(0,0,0,.45));flex:0 0 auto;}
+  .slide .art svg{width:100%;height:100%;display:block;}
   .slide h2{margin:0 0 10px;font-size:21px;}
-  .slide p{color:#e8d7cb;font-size:13.5px;line-height:1.6;max-width:280px;}
+  .slide p{color:#e8d7cb;font-size:13.5px;line-height:1.6;max-width:290px;}
+  .slide p b{color:#FFC9A8;}
   #cutBtns{display:flex;justify-content:space-between;padding:18px 24px 28px;}
   #cutBtns button{border:none;border-radius:14px;padding:11px 20px;font-weight:800;font-size:13px;cursor:pointer;}
   #cutSkip{background:none;color:#c9b8ab;}
@@ -172,19 +174,149 @@
   <div id="cutscene">
     <div id="cutDots"></div>
     <div class="slide active" data-i="0">
-      <div class="art">📦🐱☔</div>
-      <h2>A Cold &amp; Rainy Day</h2>
-      <p>In an abandoned, rainy garden, a tiny stray ginger kitten named <b>Milo</b> shivers alone inside a wet cardboard box.</p>
+      <div class="art"><svg viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg">
+        <defs><linearGradient id="sky1" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#2c3548"/><stop offset="100%" stop-color="#1a2028"/>
+        </linearGradient></defs>
+        <rect width="220" height="220" rx="26" fill="url(#sky1)"/>
+        <g stroke="#9db3d1" stroke-width="2" stroke-linecap="round" opacity="0.35">
+          <line x1="30" y1="20" x2="20" y2="45"/><line x1="70" y1="10" x2="60" y2="38"/>
+          <line x1="150" y1="15" x2="140" y2="42"/><line x1="190" y1="30" x2="180" y2="55"/>
+          <line x1="110" y1="5" x2="100" y2="30"/><line x1="45" y1="55" x2="37" y2="78"/>
+          <line x1="170" y1="60" x2="162" y2="82"/>
+        </g>
+        <ellipse cx="110" cy="188" rx="90" ry="14" fill="#161b22"/>
+        <ellipse cx="118" cy="184" rx="34" ry="7" fill="#4a6a86" opacity="0.5"/>
+        <path d="M55 150 L165 150 L158 195 L62 195 Z" fill="#a9754a"/>
+        <path d="M55 150 L165 150 L160 138 L60 138 Z" fill="#8a5c37"/>
+        <path d="M60 138 L30 118 L60 150 Z" fill="#976339"/>
+        <path d="M160 138 L190 118 L160 150 Z" fill="#976339"/>
+        <rect x="62" y="153" width="97" height="4" fill="#7a4f2c" opacity="0.6"/>
+        <circle cx="110" cy="128" r="26" fill="#FF9F76"/>
+        <path d="M90 112 L96 90 L106 110 Z" fill="#FF9F76"/>
+        <path d="M130 112 L124 90 L114 110 Z" fill="#FF9F76"/>
+        <path d="M92 114 L97 98 L104 111 Z" fill="#F07D4E"/>
+        <path d="M128 114 L123 98 L116 111 Z" fill="#F07D4E"/>
+        <path d="M99 128 q4 4 8 0" stroke="#5B4636" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+        <path d="M113 128 q4 4 8 0" stroke="#5B4636" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+        <path d="M106 136 q4 3 8 0" stroke="#5B4636" stroke-width="2" fill="none" stroke-linecap="round"/>
+      </svg></div>
+      <h2>Alone in the Rain</h2>
+      <p>Behind a quiet, abandoned garden, a small stray kitten named <b>Milo</b> huddles inside a soaked cardboard box — cold, hungry, and utterly alone.</p>
     </div>
     <div class="slide" data-i="1">
-      <div class="art">🌂✨🐱</div>
-      <h2>A Gentle Touch</h2>
-      <p>You hold an umbrella over Milo. The rain fades, warmth returns, and a tiny hope begins to glow.</p>
+      <div class="art"><svg viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="sky2" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#3d3350"/><stop offset="100%" stop-color="#5a4238"/>
+          </linearGradient>
+          <radialGradient id="glow2" cx="50%" cy="35%" r="55%">
+            <stop offset="0%" stop-color="#FFCB8E" stop-opacity="0.55"/><stop offset="100%" stop-color="#FFCB8E" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+        <rect width="220" height="220" rx="26" fill="url(#sky2)"/>
+        <rect width="220" height="220" rx="26" fill="url(#glow2)"/>
+        <g stroke="#9db3d1" stroke-width="1.6" stroke-linecap="round" opacity="0.18">
+          <line x1="20" y1="15" x2="14" y2="30"/><line x1="190" y1="20" x2="184" y2="35"/><line x1="200" y1="60" x2="194" y2="75"/>
+        </g>
+        <ellipse cx="110" cy="188" rx="90" ry="14" fill="#241812"/>
+        <ellipse cx="118" cy="184" rx="34" ry="7" fill="#6b7a56" opacity="0.4"/>
+        <path d="M58 152 L162 152 L156 195 L64 195 Z" fill="#a9754a"/>
+        <path d="M58 152 L162 152 L157 140 L63 140 Z" fill="#8a5c37"/>
+        <rect x="64" y="155" width="94" height="4" fill="#7a4f2c" opacity="0.6"/>
+        <path d="M35 85 Q110 40 185 85 Q160 72 110 74 Q60 72 35 85 Z" fill="#FF9F76"/>
+        <path d="M35 85 Q60 72 110 74 Q160 72 185 85" fill="none" stroke="#F07D4E" stroke-width="2" opacity="0.7"/>
+        <line x1="110" y1="74" x2="110" y2="150" stroke="#F07D4E" stroke-width="4" stroke-linecap="round"/>
+        <path d="M110 150 q-10 10 -18 4" stroke="#F07D4E" stroke-width="4" fill="none" stroke-linecap="round"/>
+        <circle cx="110" cy="132" r="27" fill="#FF9F76"/>
+        <path d="M90 116 L96 94 L107 114 Z" fill="#FF9F76"/>
+        <path d="M130 116 L124 94 L113 114 Z" fill="#FF9F76"/>
+        <path d="M92 118 L97 102 L104 115 Z" fill="#F07D4E"/>
+        <path d="M128 118 L123 102 L116 115 Z" fill="#F07D4E"/>
+        <circle cx="100" cy="132" r="3.6" fill="#5B4636"/><circle cx="120" cy="132" r="3.6" fill="#5B4636"/>
+        <path d="M103 141 q7 6 14 0" stroke="#5B4636" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+        <circle cx="94" cy="138" r="3.4" fill="#FFC9B0" opacity="0.8"/><circle cx="126" cy="138" r="3.4" fill="#FFC9B0" opacity="0.8"/>
+        <path d="M168 60 l3 8 8 3 -8 3 -3 8 -3 -8 -8 -3 8 -3 Z" fill="#F2B33D"/>
+      </svg></div>
+      <h2>You Found Him</h2>
+      <p>You crouch down and shield him from the storm. For the first time in days, Milo feels warm again — and he's not ready to let you go.</p>
     </div>
     <div class="slide" data-i="2">
-      <div class="art">🏡🌸😻</div>
-      <h2>A Haven of Our Own</h2>
-      <p>Warmth from every block you clear rebuilds the ruined garden into a cozy sanctuary for cats to call home.</p>
+      <div class="art"><svg viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="glow3" cx="50%" cy="45%" r="55%">
+            <stop offset="0%" stop-color="#FF8FA3" stop-opacity="0.5"/><stop offset="100%" stop-color="#FF8FA3" stop-opacity="0"/>
+          </radialGradient>
+          <linearGradient id="sky3" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#3a2a3f"/><stop offset="100%" stop-color="#2c2019"/>
+          </linearGradient>
+        </defs>
+        <rect width="220" height="220" rx="26" fill="url(#sky3)"/>
+        <rect width="220" height="220" rx="26" fill="url(#glow3)"/>
+        <g opacity="0.18" stroke="#fff" stroke-width="1">
+          <line x1="30" y1="150" x2="190" y2="150"/><line x1="30" y1="170" x2="190" y2="170"/><line x1="30" y1="190" x2="190" y2="190"/>
+          <line x1="60" y1="140" x2="60" y2="200"/><line x1="100" y1="140" x2="100" y2="200"/><line x1="140" y1="140" x2="140" y2="200"/><line x1="180" y1="140" x2="180" y2="200"/>
+        </g>
+        <rect x="72" y="70" width="34" height="34" rx="8" fill="#FFA8CE"/>
+        <rect x="108" y="70" width="34" height="34" rx="8" fill="#FFE985"/>
+        <rect x="72" y="106" width="34" height="34" rx="8" fill="#9CD2E8"/>
+        <rect x="108" y="106" width="34" height="34" rx="8" fill="#A7E3A0"/>
+        <path d="M110 60 c-14 -18 -40 -2 -22 18 c8 9 22 20 22 20 c0 0 14 -11 22 -20 c18 -20 -8 -36 -22 -18 Z" fill="#FF8FA3" opacity="0.95"/>
+        <g transform="translate(35,150)">
+          <ellipse cx="20" cy="34" rx="18" ry="12" fill="#CFD8DC"/>
+          <circle cx="20" cy="16" r="14" fill="#CFD8DC"/>
+          <path d="M9 8 L12 -4 L20 8 Z" fill="#CFD8DC"/>
+          <path d="M31 8 L28 -4 L20 8 Z" fill="#CFD8DC"/>
+          <circle cx="15" cy="16" r="2" fill="#5B4636"/><circle cx="25" cy="16" r="2" fill="#5B4636"/>
+          <path d="M16 22 q4 3 8 0" stroke="#5B4636" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+        </g>
+      </svg></div>
+      <h2>Every Block, a Little Warmth</h2>
+      <p>Every line you clear turns into <b>Warmth</b> — the spark of care that slowly rebuilds this ruined garden, one block at a time.</p>
+    </div>
+    <div class="slide" data-i="3">
+      <div class="art"><svg viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg">
+        <defs><linearGradient id="sky4" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#FFD3E0"/><stop offset="100%" stop-color="#FFE8D6"/>
+        </linearGradient></defs>
+        <rect width="220" height="220" rx="26" fill="url(#sky4)"/>
+        <circle cx="172" cy="46" r="22" fill="#F2B33D"/>
+        <g stroke="#F2B33D" stroke-width="3" stroke-linecap="round" opacity="0.7">
+          <line x1="172" y1="10" x2="172" y2="0"/><line x1="208" y1="46" x2="218" y2="46"/>
+          <line x1="197" y1="21" x2="204" y2="14"/><line x1="197" y1="71" x2="204" y2="78"/>
+        </g>
+        <path d="M0 165 Q60 140 110 160 Q160 178 220 155 L220 220 L0 220 Z" fill="#8BC5A8"/>
+        <path d="M0 178 Q70 158 120 174 Q170 188 220 170 L220 220 L0 220 Z" fill="#6FAE8C"/>
+        <g fill="#fff" opacity="0.85">
+          <circle cx="30" cy="195" r="3"/><circle cx="46" cy="200" r="3"/><circle cx="180" cy="198" r="3"/><circle cx="196" cy="204" r="3"/>
+        </g>
+        <rect x="78" y="120" width="64" height="52" rx="6" fill="#FFF7F0"/>
+        <path d="M70 122 L110 90 L150 122 Z" fill="#F07D4E"/>
+        <path d="M100 172 L100 146 Q110 138 120 146 L120 172 Z" fill="#FF8FA3"/>
+        <circle cx="110" cy="150" r="7" fill="#FFE985" opacity="0.9"/>
+        <g transform="translate(28,150)">
+          <circle cx="14" cy="14" r="13" fill="#FF9F76"/>
+          <path d="M4 8 L7 -4 L15 8 Z" fill="#FF9F76"/><path d="M24 8 L21 -4 L13 8 Z" fill="#FF9F76"/>
+          <circle cx="10" cy="14" r="1.8" fill="#5B4636"/><circle cx="18" cy="14" r="1.8" fill="#5B4636"/>
+        </g>
+        <g transform="translate(158,155)">
+          <circle cx="14" cy="14" r="13" fill="#90A4AE"/>
+          <path d="M4 8 L7 -4 L15 8 Z" fill="#90A4AE"/><path d="M24 8 L21 -4 L13 8 Z" fill="#90A4AE"/>
+          <circle cx="10" cy="14" r="1.8" fill="#33424a"/><circle cx="18" cy="14" r="1.8" fill="#33424a"/>
+        </g>
+        <g transform="translate(178,120)">
+          <circle cx="12" cy="12" r="11" fill="#37474F"/>
+          <path d="M4 7 L6 -3 L13 7 Z" fill="#37474F"/><path d="M20 7 L18 -3 L11 7 Z" fill="#37474F"/>
+          <circle cx="9" cy="12" r="1.6" fill="#fff"/><circle cx="15" cy="12" r="1.6" fill="#fff"/>
+        </g>
+        <g transform="translate(20,118)">
+          <circle cx="12" cy="12" r="11" fill="#D7B98E"/>
+          <path d="M4 7 L6 -3 L13 7 Z" fill="#D7B98E"/><path d="M20 7 L18 -3 L11 7 Z" fill="#D7B98E"/>
+          <circle cx="9" cy="12" r="1.6" fill="#5B4636"/><circle cx="15" cy="12" r="1.6" fill="#5B4636"/>
+        </g>
+      </svg></div>
+      <h2>A Haven for Every Stray</h2>
+      <p>Milo won't be the last stray who finds his way here. Clear puzzles, gather Warmth, and welcome every cat home — one Haven at a time.</p>
     </div>
     <div id="cutBtns">
       <button id="cutSkip">Skip</button>
@@ -1127,7 +1259,7 @@ function renderDots(){
 function showSlide(i){
   slides.forEach(s=>s.classList.remove('active'));
   slides[i].classList.add('active');
-  document.getElementById('cutNext').textContent = i===slides.length-1 ? 'Start' : 'Next';
+  document.getElementById('cutNext').textContent = i===slides.length-1 ? "Let's Begin" : 'Next';
   renderDots();
 }
 document.getElementById('cutNext').addEventListener('click', ()=>{
