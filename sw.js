@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cat-block-haven-v14';
+const CACHE_NAME = 'cat-block-haven-v15';
 const ASSETS = ['./', './index.html', './manifest.json', './icons/icon-192.png', './icons/icon-512.png'];
 
 self.addEventListener('install', event => {
@@ -14,6 +14,19 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', event => {
+  // app shell (the HTML page itself): always try the network first so a fresh launch
+  // picks up the latest content immediately, only falling back to cache when offline.
+  // static assets (icons, manifest): cache-first is fine, they rarely change.
+  if(event.request.mode === 'navigate'){
+    event.respondWith(
+      fetch(event.request).then(res => {
+        const copy = res.clone();
+        caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
+        return res;
+      }).catch(() => caches.match(event.request))
+    );
+    return;
+  }
   event.respondWith(
     caches.match(event.request).then(cached => cached || fetch(event.request))
   );
