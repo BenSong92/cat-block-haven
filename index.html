@@ -115,15 +115,18 @@
   #idleCard .t{font-size:12px;color:var(--sub);font-weight:700;}
   #idleCard .v{font-size:16px;font-weight:800;}
   #sanctuaryRoomTitle{font-size:12px;font-weight:800;color:var(--sub);margin:2px 0 6px;flex:0 0 auto;}
-  #sanctuaryRoom{display:flex;flex-wrap:wrap;gap:10px;padding:10px;background:rgba(255,255,255,.4);
-    border-radius:16px;margin-bottom:10px;min-height:66px;flex:0 0 auto;}
-  #sanctuaryRoom .empty{font-size:11.5px;color:var(--sub);font-weight:700;align-self:center;}
-  .roomCat{display:flex;flex-direction:column;align-items:center;width:54px;flex:0 0 auto;}
-  .roomCat .stage{position:relative;width:50px;height:50px;border-radius:14px;
-    display:flex;align-items:center;justify-content:center;font-size:23px;box-shadow:inset 0 0 0 2px #fff;}
-  .roomCat .item{position:absolute;bottom:-4px;right:-4px;font-size:15px;background:#fff;border-radius:50%;
-    padding:2px;box-shadow:0 1px 3px rgba(0,0,0,.28);}
-  .roomCat .label{font-size:9px;font-weight:700;color:var(--sub);margin-top:3px;max-width:54px;
+  #sanctuaryRoom{display:flex;flex-wrap:wrap;gap:10px;padding:12px 10px;
+    background:repeating-linear-gradient(90deg,#D8BD8E 0 18px,#C9A67A 18px 20px);
+    border-radius:16px;margin-bottom:10px;min-height:78px;flex:0 0 auto;}
+  .roomCat{display:flex;flex-direction:column;align-items:center;width:58px;flex:0 0 auto;}
+  .roomCat .stage{position:relative;width:56px;height:52px;}
+  .roomCat .stage canvas{position:relative;z-index:1;image-rendering:pixelated;image-rendering:crisp-edges;display:block;}
+  .roomCat .cushion{position:absolute;left:50%;bottom:2px;width:46px;height:14px;border-radius:50%;
+    background:radial-gradient(ellipse at center, rgba(255,159,118,.6), rgba(255,159,118,0) 70%);
+    transform:translateX(-50%);z-index:0;}
+  .roomCat .item{position:absolute;bottom:-2px;right:-2px;font-size:15px;background:#fff;border-radius:50%;
+    padding:2px;box-shadow:0 1px 3px rgba(0,0,0,.28);z-index:2;}
+  .roomCat .label{font-size:9px;font-weight:700;color:var(--sub);margin-top:3px;max-width:58px;
     text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   #furnitureGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding-bottom:10px;}
   .fCard{background:var(--card);border-radius:16px;padding:10px;box-shadow:0 4px 10px rgba(0,0,0,.06);text-align:center;}
@@ -548,6 +551,37 @@ const FURNITURE = [
   {catId:'oliver', name:'Wheel Exercise Gym', emoji:'🎡', cost:2500, perk:'Recruits Oliver'},
   {catId:'forest', name:'Grand Treehouse', emoji:'🌳', cost:3500, perk:'Recruits Forest'},
 ];
+
+/* ---------------- pixel cat sprite (hand-drawn, mirrored left-half data) ---------------- */
+const CAT_SPRITE = [
+".O.....",
+"OFFO...",
+"OFFFO..",
+"OFFFFO.",
+"OFFFFFO",
+"OFFEFFF",
+"OFFFFFN",
+"OFFFFFF",
+"OFFFFFF",
+"OFFBBBB",
+"OFFBBBB",
+"OFFBBBB",
+"OOOOOOO",
+];
+function drawCatSprite(ctx, color, px){
+  const palette = {O:'#2c1f18', F:color, B:'#FFF6EC', E:'#2c1f18', N:'#FF8FA3'};
+  const halfW = CAT_SPRITE[0].length, totalW = halfW*2;
+  for(let ry=0; ry<CAT_SPRITE.length; ry++){
+    const row = CAT_SPRITE[ry];
+    for(let cx=0; cx<halfW; cx++){
+      const ch = row[cx];
+      if(ch==='.') continue;
+      ctx.fillStyle = palette[ch];
+      ctx.fillRect(cx*px, ry*px, px, px);
+      ctx.fillRect((totalW-1-cx)*px, ry*px, px, px);
+    }
+  }
+}
 
 const SAVE_KEY = 'catBlockHaven_save_v1';
 const CONFIG_VERSION = 2;
@@ -1299,10 +1333,13 @@ function renderSanctuaryRoom(){
     const owned = state.furniture[i];
     const div = document.createElement('div');
     div.className='roomCat';
-    div.innerHTML = '<div class="stage" style="background:'+cat.color+'22">'+cat.emoji+
+    div.innerHTML = '<div class="stage"><div class="cushion"></div><canvas width="56" height="52"></canvas>'+
       (owned ? '<span class="item">'+FURNITURE[i].emoji+'</span>' : '')+'</div>'+
       '<div class="label">'+cat.name+'</div>';
     room.appendChild(div);
+    const cctx = div.querySelector('canvas').getContext('2d');
+    cctx.imageSmoothingEnabled = false;
+    drawCatSprite(cctx, cat.color, 4);
   });
 }
 function renderSanctuary(){
