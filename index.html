@@ -114,21 +114,9 @@
     display:flex;justify-content:space-between;align-items:center;flex:0 0 auto;}
   #idleCard .t{font-size:12px;color:var(--sub);font-weight:700;}
   #idleCard .v{font-size:16px;font-weight:800;}
-  #sanctuaryRoomTitle{font-size:12px;font-weight:800;color:var(--sub);margin:2px 0 6px;flex:0 0 auto;}
-  #sanctuaryRoom{display:flex;flex-wrap:wrap;gap:10px;padding:12px 10px;
-    background:repeating-linear-gradient(90deg,#D8BD8E 0 18px,#C9A67A 18px 20px);
-    border-radius:16px;margin-bottom:10px;min-height:78px;flex:0 0 auto;}
-  .roomCat{display:flex;flex-direction:column;align-items:center;width:58px;flex:0 0 auto;}
-  .roomCat .stage{position:relative;width:56px;height:52px;}
-  .roomCat .stage canvas{position:relative;z-index:1;image-rendering:pixelated;image-rendering:crisp-edges;display:block;}
-  .roomCat .cushion{position:absolute;left:50%;bottom:2px;width:46px;height:14px;border-radius:50%;
-    background:radial-gradient(ellipse at center, rgba(255,159,118,.6), rgba(255,159,118,0) 70%);
-    transform:translateX(-50%);z-index:0;}
-  .roomCat .item{position:absolute;bottom:-2px;right:-2px;font-size:15px;background:#fff;border-radius:50%;
-    padding:2px;box-shadow:0 1px 3px rgba(0,0,0,.28);z-index:2;}
-  .roomCat .label{font-size:9px;font-weight:700;color:var(--sub);margin-top:3px;max-width:58px;
-    text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   #furnitureGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding-bottom:10px;}
+  #roomShopTitle{font-size:12px;font-weight:800;color:var(--sub);margin:6px 0 6px;flex:0 0 auto;}
+  #roomShopGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding-bottom:10px;}
   .fCard{background:var(--card);border-radius:16px;padding:10px;box-shadow:0 4px 10px rgba(0,0,0,.06);text-align:center;}
   .fCard .em{font-size:30px;}
   .fCard .name{font-weight:800;font-size:12.5px;margin-top:2px;}
@@ -138,6 +126,32 @@
   .fCard button.buy{background:var(--accent2);color:#fff;}
   .fCard button.buy:disabled{background:#ddd;color:#999;cursor:default;}
   .fCard button.owned{background:#f0e6da;color:var(--sub);}
+
+  /* room view */
+  #roomView{padding-top:4px;}
+  #roomScene{position:relative;flex:0 0 auto;height:480px;border-radius:18px;overflow:hidden;
+    box-shadow:0 4px 12px rgba(0,0,0,.1);}
+  .roomWall{position:absolute;top:0;left:0;right:0;height:58%;background:linear-gradient(180deg,#F8E3CF,#F0D2B8);}
+  .roomFloor{position:absolute;left:0;right:0;bottom:0;height:42%;
+    background:repeating-linear-gradient(90deg,#D8BD8E 0 18px,#C9A67A 18px 20px);
+    box-shadow:inset 0 4px 0 rgba(0,0,0,.08);}
+  #roomProps{position:absolute;inset:0;z-index:1;}
+  .roomProp{position:absolute;font-size:34px;filter:drop-shadow(0 3px 3px rgba(0,0,0,.2));}
+  #roomCats{position:absolute;inset:0;z-index:2;display:flex;flex-wrap:wrap;align-items:flex-end;
+    align-content:flex-end;justify-content:center;gap:16px 10px;padding:14px 12px 18px;}
+  .bigCat{display:flex;flex-direction:column;align-items:center;width:150px;}
+  .bigCat .stage{position:relative;width:132px;height:108px;animation:catBob 2.6s ease-in-out infinite;}
+  .bigCat.playing .stage{animation:catWiggle 1.1s ease-in-out infinite;}
+  .bigCat .stage canvas{image-rendering:pixelated;image-rendering:crisp-edges;display:block;}
+  .bigCat .cushion{position:absolute;left:50%;bottom:-8px;width:110px;height:16px;border-radius:50%;
+    background:radial-gradient(ellipse at center, rgba(255,159,118,.45), rgba(255,159,118,0) 70%);
+    transform:translateX(-50%);z-index:-1;}
+  .bigCat .label{font-size:11px;font-weight:800;color:var(--text);background:rgba(255,255,255,.7);
+    padding:2px 8px;border-radius:10px;margin-top:2px;}
+  @keyframes catBob{0%,100%{transform:translateY(0);}50%{transform:translateY(-6px);}}
+  @keyframes catWiggle{0%,100%{transform:rotate(0deg);}25%{transform:rotate(-6deg);}75%{transform:rotate(6deg);}}
+  .roomSparkle{position:absolute;font-size:16px;opacity:.9;animation:sparkleFloat 3.2s ease-in-out infinite;pointer-events:none;z-index:3;}
+  @keyframes sparkleFloat{0%{transform:translateY(0);opacity:0;}15%{opacity:1;}100%{transform:translateY(-40px);opacity:0;}}
 
   /* toast */
   #toast{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);background:var(--text);color:#fff;
@@ -224,6 +238,7 @@
   <div id="tabs">
     <button class="tab active" data-tab="puzzle" id="tabPuzzle">🧩 Puzzle</button>
     <button class="tab" data-tab="sanctuary" id="tabSanctuary">🏡 Sanctuary</button>
+    <button class="tab" data-tab="room" id="tabRoom">🏠 Room</button>
   </div>
 
   <div id="views">
@@ -247,13 +262,22 @@
 
     <div id="sanctuaryView" class="view">
       <div id="sanctuaryIntro">🧡 Warmth you earn in Puzzle mode buys furniture here. Each piece recruits a cat — recruited cats earn idle 🪙 gold <b>and</b> unlock their active skill back in Puzzle mode!</div>
-      <div id="sanctuaryRoomTitle">🐾 Your Cats</div>
-      <div id="sanctuaryRoom"></div>
       <div id="idleCard">
         <div><div class="t" id="idleIncomeLabel">Idle income</div><div class="v">🪙 +<span id="idleRate">0</span> / 5s</div></div>
         <div><div class="t" id="catsRecruitedLabel">Cats recruited</div><div class="v" id="catCount">1 / 10</div></div>
       </div>
       <div id="furnitureGrid"></div>
+      <div id="roomShopTitle">🛋️ Room Upgrades</div>
+      <div id="roomShopGrid"></div>
+    </div>
+
+    <div id="roomView" class="view">
+      <div id="roomScene">
+        <div class="roomWall"></div>
+        <div class="roomFloor"></div>
+        <div id="roomProps"></div>
+        <div id="roomCats"></div>
+      </div>
     </div>
   </div>
 
@@ -334,10 +358,13 @@ const I18N = {
       {title:'A Home of His Own', body:"The cardboard box is gone. In its place: warm sunlight, a soft bed, and a home to call his own. This is where his story — and yours — really begins."},
     ],
     skip:'Skip', next:'Next', begin:"Let's Begin",
-    tabPuzzle:'🧩 Puzzle', tabSanctuary:'🏡 Sanctuary',
+    tabPuzzle:'🧩 Puzzle', tabSanctuary:'🏡 Sanctuary', tabRoom:'🏠 Room',
+    roomShopTitle:'🛋️ Room Upgrades',
+    roomItemName:{catTower:'Cat Tower', catHouse:'Cat House', driedFish:'Dried Fish Snack', neuter:'Spay/Neuter'},
+    roomItemDesc:{catTower:'+2 idle gold/tick', catHouse:'+3 idle gold/tick', driedFish:'+1 idle gold/tick', neuter:'+25% idle income, forever'},
     tapCell:'Tap a cell on the board', cancel:'Cancel',
     sanctuaryIntro:'🧡 Warmth you earn in Puzzle mode buys furniture here. Each piece recruits a cat — recruited cats earn idle 🪙 gold <b>and</b> unlock their active skill back in Puzzle mode!',
-    idleIncome:'Idle income', catsRecruited:'Cats recruited', roomTitle:'🐾 Your Cats',
+    idleIncome:'Idle income', catsRecruited:'Cats recruited',
     levelCompleteTitle:'🎉 Level Complete!', continueBtn:'Continue',
     lcText:(level)=>'You reached the target score for Level '+level+'!',
     failTitles:{moves:'⏳ Out of Moves', time:"⏰ Time's Up!", stuck:'💥 Game Over!'},
@@ -395,6 +422,7 @@ const I18N = {
       skillUsed:(catName,skillName)=>'✨ '+catName+' used '+skillName+'!',
       furniturePlaced:(fName,catName)=>'📦 '+fName+' placed for '+catName+'!',
       catJoined:(catName)=>'🎉 '+catName+' joined your sanctuary!',
+      roomItemBought:(name)=>'🛋️ '+name+' added to the room!',
     },
   },
   ko: {
@@ -404,10 +432,13 @@ const I18N = {
       {title:'그만의 보금자리', body:'판지 상자는 이제 없어요. 그 자리엔 따스한 햇살과 포근한 침대, 자신만의 집이 생겼죠. 이제부터 그의 이야기가 — 그리고 당신의 이야기도 — 진짜로 시작돼요.'},
     ],
     skip:'건너뛰기', next:'다음', begin:'시작하기',
-    tabPuzzle:'🧩 퍼즐', tabSanctuary:'🏡 보금자리',
+    tabPuzzle:'🧩 퍼즐', tabSanctuary:'🏡 보금자리', tabRoom:'🏠 우리 집',
+    roomShopTitle:'🛋️ 방 꾸미기',
+    roomItemName:{catTower:'캣타워', catHouse:'고양이 집', driedFish:'열빙어 간식', neuter:'중성화 수술'},
+    roomItemDesc:{catTower:'방치 골드 +2/틱', catHouse:'방치 골드 +3/틱', driedFish:'방치 골드 +1/틱', neuter:'방치 수입 영구 +25%'},
     tapCell:'보드에서 칸을 눌러주세요', cancel:'취소',
     sanctuaryIntro:'🧡 퍼즐 모드에서 얻은 온기로 여기서 가구를 살 수 있어요. 가구마다 고양이를 한 마리씩 영입하고, 영입된 고양이는 방치 중에도 🪙 골드를 벌어주며 <b>동시에</b> 퍼즐 모드에서 스킬도 쓸 수 있게 해줘요!',
-    idleIncome:'방치 수입', catsRecruited:'영입한 고양이', roomTitle:'🐾 내 고양이들',
+    idleIncome:'방치 수입', catsRecruited:'영입한 고양이',
     levelCompleteTitle:'🎉 레벨 클리어!', continueBtn:'계속하기',
     lcText:(level)=>'레벨 '+level+'의 목표 점수를 달성했어요!',
     failTitles:{moves:'⏳ 이동 횟수 소진', time:'⏰ 시간 종료!', stuck:'💥 게임 오버!'},
@@ -465,6 +496,7 @@ const I18N = {
       skillUsed:(catName,skillName)=>'✨ '+catName+'가 '+skillName+'을 사용했어요!',
       furniturePlaced:(fName,catName)=>'📦 '+catName+'를 위해 '+fName+'을 놓았어요!',
       catJoined:(catName)=>'🎉 '+catName+'가 보금자리에 합류했어요!',
+      roomItemBought:(name)=>'🛋️ '+name+'을(를) 우리 집에 놓았어요!',
     },
   },
 };
@@ -480,12 +512,13 @@ function applyI18N(){
   });
   document.getElementById('tabPuzzle').textContent = t.tabPuzzle;
   document.getElementById('tabSanctuary').textContent = t.tabSanctuary;
+  document.getElementById('tabRoom').textContent = t.tabRoom;
+  document.getElementById('roomShopTitle').textContent = t.roomShopTitle;
   document.getElementById('tapCellText').textContent = t.tapCell;
   document.getElementById('cancelTarget').textContent = t.cancel;
   document.getElementById('sanctuaryIntro').innerHTML = t.sanctuaryIntro;
   document.getElementById('idleIncomeLabel').textContent = t.idleIncome;
   document.getElementById('catsRecruitedLabel').textContent = t.catsRecruited;
-  document.getElementById('sanctuaryRoomTitle').textContent = t.roomTitle;
   document.getElementById('lcTitle').textContent = t.levelCompleteTitle;
   document.getElementById('lcContinue').textContent = t.continueBtn;
   document.getElementById('offlineTitle').textContent = t.welcomeBack;
@@ -552,22 +585,45 @@ const FURNITURE = [
   {catId:'forest', name:'Grand Treehouse', emoji:'🌳', cost:3500, perk:'Recruits Forest'},
 ];
 
-/* ---------------- pixel cat sprite (hand-drawn, mirrored left-half data) ---------------- */
-const CAT_SPRITE = [
-".O.....",
-"OFFO...",
-"OFFFO..",
-"OFFFFO.",
-"OFFFFFO",
-"OFFEFFF",
-"OFFFFFN",
-"OFFFFFF",
-"OFFFFFF",
-"OFFBBBB",
-"OFFBBBB",
-"OFFBBBB",
-"OOOOOOO",
+/* ---------------- room upgrades (global, not tied to one cat) ---------------- */
+const ROOM_ITEMS = [
+  {id:'catTower', emoji:'🏰', cost:800},
+  {id:'catHouse', emoji:'🏠', cost:1200},
+  {id:'driedFish', emoji:'🐟', cost:150},
+  {id:'neuter', emoji:'🩺', cost:6000},
 ];
+function roomItemBonus(){
+  let b = 0;
+  if(state.roomItems.catTower) b += 2;
+  if(state.roomItems.catHouse) b += 3;
+  if(state.roomItems.driedFish) b += 1;
+  return b;
+}
+function roomItemMult(){ return state.roomItems.neuter ? 1.25 : 1; }
+function anyToyOwned(){ return state.roomItems.catTower || state.roomItems.catHouse || state.roomItems.driedFish; }
+
+/* ---------------- pixel cat sprite (hand-drawn, mirrored left-half data + a small non-mirrored tail) ---------------- */
+const CAT_SPRITE = [
+"...O.....",
+"..OFO....",
+".OFFFO...",
+"OFFFFFFO.",
+"OFFFFFFFF",
+"OFFFFFFFF",
+"OFFEFFFFF",
+"OFFFFFFFN",
+"OFFFFFFFF",
+"OFFFFFFFF",
+"OFFFFFFFF",
+"OFFBBBBBB",
+"OFFBBBBBB",
+"OFFBBBBBB",
+"OFFBBBBBB",
+"OFFF.....",
+"OFFF.....",
+"OOOO.....",
+];
+const CAT_TAIL = [ [18,13],[19,13], [20,12], [21,11], [21,10], [20,9] ];
 function drawCatSprite(ctx, color, px){
   const palette = {O:'#2c1f18', F:color, B:'#FFF6EC', E:'#2c1f18', N:'#FF8FA3'};
   const halfW = CAT_SPRITE[0].length, totalW = halfW*2;
@@ -581,10 +637,12 @@ function drawCatSprite(ctx, color, px){
       ctx.fillRect((totalW-1-cx)*px, ry*px, px, px);
     }
   }
+  ctx.fillStyle = color;
+  CAT_TAIL.forEach(([cx,ry])=>{ ctx.fillRect(cx*px, ry*px, px, px); });
 }
 
 const SAVE_KEY = 'catBlockHaven_save_v1';
-const CONFIG_VERSION = 2;
+const CONFIG_VERSION = 3;
 const CELL = 41, DPR = Math.max(1, Math.min(window.devicePixelRatio||1, 3));
 
 /* ---------------- state ---------------- */
@@ -592,10 +650,11 @@ let state = null;
 function freshState(){
   const cats = {}; CATS.forEach((c,i)=>{ cats[c.id] = {recruited: i===0, gauge:0}; });
   const furniture = {}; FURNITURE.forEach((f,i)=>{ furniture[i]=false; });
+  const roomItems = {}; ROOM_ITEMS.forEach(r=>{ roomItems[r.id]=false; });
   return {
     gold:20, warmth:0, level:1, levelScore:0, movesLeft:0, timeLeft:0, targetScore:0,
     board: null, tray: [null,null,null],
-    cats, furniture, gems:[], comboStreak:0,
+    cats, furniture, roomItems, gems:[], comboStreak:0,
     reviveAvailable:true, infiniteMode:false, infiniteScore:0,
     goldBoostUntil:0, gaugeBoostUntil:0,
     leaderboard:[], weekStart: Date.now(),
@@ -1324,26 +1383,7 @@ function updateClearsHint(){
   el.textContent = T().clearsRemaining(remaining, estClears);
 }
 
-function renderSanctuaryRoom(){
-  const room = document.getElementById('sanctuaryRoom');
-  room.innerHTML='';
-  CATS.forEach((cat,i)=>{
-    const cs = state.cats[cat.id];
-    if(!cs.recruited) return;
-    const owned = state.furniture[i];
-    const div = document.createElement('div');
-    div.className='roomCat';
-    div.innerHTML = '<div class="stage"><div class="cushion"></div><canvas width="56" height="52"></canvas>'+
-      (owned ? '<span class="item">'+FURNITURE[i].emoji+'</span>' : '')+'</div>'+
-      '<div class="label">'+cat.name+'</div>';
-    room.appendChild(div);
-    const cctx = div.querySelector('canvas').getContext('2d');
-    cctx.imageSmoothingEnabled = false;
-    drawCatSprite(cctx, cat.color, 4);
-  });
-}
 function renderSanctuary(){
-  renderSanctuaryRoom();
   const grid = document.getElementById('furnitureGrid');
   grid.innerHTML='';
   let idle=0, recruitedCount=0;
@@ -1351,6 +1391,7 @@ function renderSanctuary(){
   document.getElementById('catCount').textContent = recruitedCount+' / 10';
   idle = recruitedCount>0 ? Math.round(recruitedCount*5.5) : 0;
   if(state.furniture[0]) idle += 1;
+  idle = Math.round((idle+roomItemBonus())*roomItemMult());
   document.getElementById('idleRate').textContent = idle;
 
   FURNITURE.forEach((f,i)=>{
@@ -1370,6 +1411,7 @@ function renderSanctuary(){
     }
     grid.appendChild(card);
   });
+  renderRoomShop();
 }
 function buyFurniture(i){
   const f = FURNITURE[i];
@@ -1381,7 +1423,78 @@ function buyFurniture(i){
   state.cats[cat.id].recruited = true;
   SND.buy();
   toast(wasRecruited ? T().toast.furniturePlaced(furnitureName(i), cat.name) : T().toast.catJoined(cat.name));
-  renderAll(); save();
+  renderAll(); renderRoom(); save();
+}
+
+function renderRoomShop(){
+  const grid = document.getElementById('roomShopGrid');
+  grid.innerHTML='';
+  ROOM_ITEMS.forEach(item=>{
+    const owned = state.roomItems[item.id];
+    const card = document.createElement('div');
+    card.className='fCard';
+    card.innerHTML = '<div class="em">'+item.emoji+'</div>'+
+      '<div class="name">'+T().roomItemName[item.id]+'</div>'+
+      '<div class="cat">'+T().roomItemDesc[item.id]+'</div>'+
+      (owned
+        ? '<button class="owned">'+T().owned+'</button>'
+        : '<button class="buy" '+(state.warmth<item.cost?'disabled':'')+'>'+T().buy(item.cost)+'</button>');
+    if(!owned){
+      card.querySelector('button').addEventListener('click', ()=>buyRoomItem(item.id));
+    }
+    grid.appendChild(card);
+  });
+}
+function buyRoomItem(id){
+  const item = ROOM_ITEMS.find(r=>r.id===id);
+  if(state.roomItems[id] || state.warmth<item.cost) return;
+  state.warmth -= item.cost;
+  state.roomItems[id] = true;
+  SND.buy();
+  toast(T().toast.roomItemBought(T().roomItemName[id]));
+  renderAll(); renderRoom(); save();
+}
+
+/* ---------------- room view (big pixel cats living in the sanctuary) ---------------- */
+function renderRoom(){
+  const catsWrap = document.getElementById('roomCats');
+  const propsWrap = document.getElementById('roomProps');
+  if(!catsWrap || !propsWrap) return;
+  catsWrap.innerHTML=''; propsWrap.innerHTML='';
+  const playful = anyToyOwned();
+  CATS.forEach(cat=>{
+    const cs = state.cats[cat.id];
+    if(!cs.recruited) return;
+    const div = document.createElement('div');
+    div.className = 'bigCat'+(playful?' playing':'');
+    div.style.animationDelay = (Math.random()*0.6)+'s';
+    div.innerHTML = '<div class="stage" style="animation-delay:'+(Math.random()*1.6).toFixed(2)+'s"><div class="cushion"></div><canvas width="132" height="108"></canvas></div>'+
+      '<div class="label">'+cat.name+'</div>';
+    catsWrap.appendChild(div);
+    const cctx = div.querySelector('canvas').getContext('2d');
+    cctx.imageSmoothingEnabled = false;
+    drawCatSprite(cctx, cat.color, 6);
+  });
+  const propPositions = {catTower:'left:2%;bottom:2%;', catHouse:'right:2%;bottom:2%;', driedFish:'left:2%;top:6%;'};
+  ROOM_ITEMS.forEach(item=>{
+    if(item.id==='neuter' || !state.roomItems[item.id]) return;
+    const p = document.createElement('div');
+    p.className = 'roomProp';
+    p.style.cssText = propPositions[item.id]||'';
+    p.textContent = item.emoji;
+    propsWrap.appendChild(p);
+  });
+  if(state.roomItems.neuter){
+    for(let i=0;i<5;i++){
+      const s = document.createElement('div');
+      s.className = 'roomSparkle';
+      s.textContent = '💙';
+      s.style.left = (10+Math.random()*80)+'%';
+      s.style.bottom = (15+Math.random()*40)+'%';
+      s.style.animationDelay = (Math.random()*3)+'s';
+      propsWrap.appendChild(s);
+    }
+  }
 }
 
 let toastTimer=null;
@@ -1467,6 +1580,7 @@ document.querySelectorAll('.tab').forEach(btn=>{
     btn.classList.add('active');
     document.getElementById(btn.dataset.tab+'View').classList.add('active');
     if(btn.dataset.tab==='sanctuary') renderSanctuary();
+    else if(btn.dataset.tab==='room') renderRoom();
   });
 });
 
@@ -1556,6 +1670,8 @@ function idleTick(){
   let gain=0;
   CATS.forEach(c=>{ if(state.cats[c.id].recruited) gain += 1+Math.floor(Math.random()*10); });
   if(state.furniture[0]) gain += 1;
+  gain += roomItemBonus();
+  gain = Math.round(gain*roomItemMult());
   if(Date.now()<state.goldBoostUntil) gain*=2;
   state.gold += gain;
   updateHUD(); save();
@@ -1568,7 +1684,7 @@ function applyOffline(){
   if(ticks<3) return;
   let recruitedCount=0; CATS.forEach(c=>{ if(state.cats[c.id].recruited) recruitedCount++; });
   if(recruitedCount===0) return;
-  const avgPerTick = recruitedCount*5.5 + (state.furniture[0]?1:0);
+  const avgPerTick = (recruitedCount*5.5 + (state.furniture[0]?1:0) + roomItemBonus()) * roomItemMult();
   const gold = Math.round(avgPerTick*ticks);
   if(gold<=0) return;
   state.gold += gold;
@@ -1581,6 +1697,7 @@ function init(){
   const loaded = load();
   state = loaded || freshState();
   if(!state.board) newLevelBoard();
+  if(!state.roomItems){ const ri={}; ROOM_ITEMS.forEach(r=>{ ri[r.id]=false; }); state.roomItems = ri; }
   if(state.configVersion !== CONFIG_VERSION){
     if(!state.infiniteMode) newLevelBoard();
     state.configVersion = CONFIG_VERSION;
