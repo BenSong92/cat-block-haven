@@ -208,8 +208,8 @@
   </div>
 
   <div id="tabs">
-    <button class="tab active" data-tab="puzzle">🧩 Puzzle</button>
-    <button class="tab" data-tab="sanctuary">🏡 Sanctuary</button>
+    <button class="tab active" data-tab="puzzle" id="tabPuzzle">🧩 Puzzle</button>
+    <button class="tab" data-tab="sanctuary" id="tabSanctuary">🏡 Sanctuary</button>
   </div>
 
   <div id="views">
@@ -219,7 +219,7 @@
       <div id="clearsHint"></div>
       <div id="catBar"></div>
       <div id="boardWrap">
-        <div id="targetOverlay" class="hidden">Tap a cell on the board<button id="cancelTarget">Cancel</button></div>
+        <div id="targetOverlay" class="hidden"><span id="tapCellText">Tap a cell on the board</span><button id="cancelTarget">Cancel</button></div>
         <canvas id="board" width="328" height="328"></canvas>
         <div id="comboPopup"></div>
         <div id="scorePopup"></div>
@@ -234,8 +234,8 @@
     <div id="sanctuaryView" class="view">
       <div id="sanctuaryIntro">🧡 Warmth you earn in Puzzle mode buys furniture here. Each piece recruits a cat — recruited cats earn idle 🪙 gold <b>and</b> unlock their active skill back in Puzzle mode!</div>
       <div id="idleCard">
-        <div><div class="t">Idle income</div><div class="v">🪙 +<span id="idleRate">0</span> / 5s</div></div>
-        <div><div class="t">Cats recruited</div><div class="v" id="catCount">1 / 10</div></div>
+        <div><div class="t" id="idleIncomeLabel">Idle income</div><div class="v">🪙 +<span id="idleRate">0</span> / 5s</div></div>
+        <div><div class="t" id="catsRecruitedLabel">Cats recruited</div><div class="v" id="catCount">1 / 10</div></div>
       </div>
       <div id="furnitureGrid"></div>
     </div>
@@ -245,7 +245,7 @@
 
   <div id="levelCompleteModal" class="modal hidden">
     <div class="card">
-      <h2>🎉 Level Complete!</h2>
+      <h2 id="lcTitle">🎉 Level Complete!</h2>
       <p id="lcText"></p>
       <div class="rewards" id="lcRewards"></div>
       <button id="lcContinue">Continue</button>
@@ -262,8 +262,8 @@
 
   <div id="offlineModal" class="modal hidden">
     <div class="card">
-      <h2>💤 Welcome back!</h2>
-      <p>Your cats kept the sanctuary running while you were away.</p>
+      <h2 id="offlineTitle">💤 Welcome back!</h2>
+      <p id="offlineDescText">Your cats kept the sanctuary running while you were away.</p>
       <div class="rewards" id="offlineRewards"></div>
       <button id="offlineOk">Yay!</button>
     </div>
@@ -271,22 +271,23 @@
 
   <div id="settingsModal" class="modal hidden">
     <div class="card">
-      <h2>⚙️ Settings</h2>
-      <div class="row"><span>Sound</span><button id="soundToggle">🔊 On</button></div>
-      <div class="row"><span>Progress</span><button id="resetBtn" style="background:var(--danger);color:#fff;">Reset</button></div>
+      <h2 id="settingsTitle">⚙️ Settings</h2>
+      <div class="row"><span id="soundLabel">Sound</span><button id="soundToggle">🔊 On</button></div>
+      <div class="row"><span id="langLabel">Language</span><button id="langToggle">EN</button></div>
+      <div class="row"><span id="progressLabel">Progress</span><button id="resetBtn" style="background:var(--danger);color:#fff;">Reset</button></div>
       <button id="settingsClose" style="margin-top:14px;">Close</button>
     </div>
   </div>
 
   <div id="helpModal" class="modal hidden">
     <div class="card">
-      <h2>📖 How to Play</h2>
+      <h2 id="helpTitle">📖 How to Play</h2>
       <div class="helpSteps">
-        <div class="helpStep"><span class="hEm">👆</span><div>Drag a piece from the tray onto the board.</div></div>
-        <div class="helpStep"><span class="hEm">📏</span><div>Fill a full row or column to clear it and score points.</div></div>
-        <div class="helpStep"><span class="hEm">🎯</span><div>Reach the target score shown above before time or moves run out.</div></div>
-        <div class="helpStep"><span class="hEm">🐱</span><div>Clearing lines charges cat gauges — tap a glowing cat for its skill.</div></div>
-        <div class="helpStep"><span class="hEm">🏡</span><div>Switch to Sanctuary to spend Warmth on furniture — each piece recruits a cat that earns idle gold <b>and</b> unlocks its skill in Puzzle mode.</div></div>
+        <div class="helpStep"><span class="hEm">👆</span><div id="help0Text">Drag a piece from the tray onto the board.</div></div>
+        <div class="helpStep"><span class="hEm">📏</span><div id="help1Text">Fill a full row or column to clear it and score points.</div></div>
+        <div class="helpStep"><span class="hEm">🎯</span><div id="help2Text">Reach the target score shown above before time or moves run out.</div></div>
+        <div class="helpStep"><span class="hEm">🐱</span><div id="help3Text">Clearing lines charges cat gauges — tap a glowing cat for its skill.</div></div>
+        <div class="helpStep"><span class="hEm">🏡</span><div id="help4Text">Switch to Sanctuary to spend Warmth on furniture — each piece recruits a cat that earns idle gold <b>and</b> unlocks its skill in Puzzle mode.</div></div>
       </div>
       <button id="helpClose">Got it!</button>
     </div>
@@ -299,6 +300,192 @@
 <script>
 (function(){
 "use strict";
+
+/* ---------------- i18n ---------------- */
+const LANG_KEY = 'catBlockHaven_lang_v1';
+function detectLang(){
+  try{ const saved = localStorage.getItem(LANG_KEY); if(saved==='en'||saved==='ko') return saved; }catch(e){}
+  const nl = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
+  return nl.startsWith('ko') ? 'ko' : 'en';
+}
+let LANG = detectLang();
+function T(){ return I18N[LANG]; }
+const I18N = {
+  en: {
+    cutscene: [
+      {title:'Alone in the Rain', body:'Behind a quiet, abandoned garden, a small stray kitten named <b>Milo</b> huddles inside a soaked cardboard box — cold, hungry, and utterly alone.'},
+      {title:'You Found Him', body:"You crouch down and shield him from the storm. For the first time in days, Milo feels warm again — and he's not ready to let you go."},
+      {title:'A Home of His Own', body:"The cardboard box is gone. In its place: warm sunlight, a soft bed, and a home to call his own. This is where his story — and yours — really begins."},
+    ],
+    skip:'Skip', next:'Next', begin:"Let's Begin",
+    tabPuzzle:'🧩 Puzzle', tabSanctuary:'🏡 Sanctuary',
+    tapCell:'Tap a cell on the board', cancel:'Cancel',
+    sanctuaryIntro:'🧡 Warmth you earn in Puzzle mode buys furniture here. Each piece recruits a cat — recruited cats earn idle 🪙 gold <b>and</b> unlock their active skill back in Puzzle mode!',
+    idleIncome:'Idle income', catsRecruited:'Cats recruited',
+    levelCompleteTitle:'🎉 Level Complete!', continueBtn:'Continue',
+    lcText:(level)=>'You reached the target score for Level '+level+'!',
+    failTitles:{moves:'⏳ Out of Moves', time:"⏰ Time's Up!", stuck:'💥 Game Over!'},
+    failTexts:{
+      moves:'You reached the move limit before hitting the target score. Give it another go!',
+      time:'The clock ran out before you hit the target score. Try again!',
+      stuck:'No piece in your tray fits on the board anymore. Game over — try this level again!',
+    },
+    retryLevel:'Retry Level', playAgain:'Play Again',
+    welcomeBack:'💤 Welcome back!', offlineDesc:'Your cats kept the sanctuary running while you were away.', yay:'Yay!',
+    settingsTitle:'⚙️ Settings', sound:'Sound', language:'Language', progress:'Progress', reset:'Reset', close:'Close',
+    soundOn:'🔊 On', soundOff:'🔇 Off', langBtn:'EN',
+    howToPlay:'📖 How to Play',
+    help:[
+      'Drag a piece from the tray onto the board.',
+      'Fill a full row or column to clear it and score points.',
+      'Reach the target score shown above before time or moves run out.',
+      'Clearing lines charges cat gauges — tap a glowing cat for its skill.',
+      'Switch to Sanctuary to spend Warmth on furniture — each piece recruits a cat that earns idle gold <b>and</b> unlocks its skill in Puzzle mode.',
+    ],
+    gotIt:'Got it!',
+    infiniteEndedTitle:'🌟 Infinite Run Ended',
+    infiniteEndedText:(score,best)=>"Score: "+score+" · This week's best: "+best+' (local device only)',
+    comboAmazing:'AMAZING!', comboTriple:'TRIPLE!', comboDouble:'DOUBLE!', comboNice:'NICE!',
+    comboStreak:(n)=>'COMBO x'+n+'!',
+    modeInfinite:(score)=>'Infinite Mode · Score <b>'+score+'</b>',
+    modeLevel:(level,ls,ts)=>'Level <b>'+level+'</b> · '+ls+' / '+ts,
+    movesLabel:(m)=>'Moves: <b id="movesVal">'+m+'</b>',
+    clearsInfinite:'♾️ Keep clearing lines — no limit!',
+    clearsTargetReached:'🎉 Target reached!',
+    clearsRemaining:(remaining,est)=>'🎯 '+remaining+' pts to go — about '+est+(est===1?' more clear!':' more clears!'),
+    owned:'Owned ✓', buy:(cost)=>'Buy 🧡 '+cost,
+    resetConfirm:'Reset all progress? This cannot be undone.',
+    catSkillName:{ milo:'3x3 Paw Punch', cleo:'Color Wipe', leo:'Cross Laser', tux:'Gold Booster', blue:'Ice Breaker', coco:'Combo Accelerator', mocha:'Nine Lives Revive', cloud:'Board Shuffle', oliver:'Move Extender', forest:'Warmth Magnet' },
+    furnitureName:['Cardboard Tower','Plush Cushion','Play Tunnel','Luxury Sofa','Marble Cooling Mat','Wooden Scratcher','Feather Wand','Velvet Bed','Wheel Exercise Gym','Grand Treehouse'],
+    furniturePerk:['+1 idle gold/tick','Recruits Cleo','Recruits Leo','Recruits Tux','Recruits Blue','Recruits Coco','Recruits Mocha','Recruits Cloud','Recruits Oliver','Recruits Forest'],
+    toast:{
+      gemWarmth:(n)=>'✨ +'+n+' gem warmth!',
+      mochaRevive:'💗 Mocha used Nine Lives Revive! A path opens...',
+      iceAppear:'❄️ Ice Blocks appear! The indoor shelter expands!',
+      yarnAppear:'🧶 Yarn Balls appear on the board!',
+      terraceUnlock:'🌇 Terrace & Outdoor Sunroom unlocked!',
+      advancedChallenges:'🏆 Advanced challenges begin — collect all 10 cats!',
+      infiniteUnlocked:'🌟 500 levels complete! Weekly Infinite Mode unlocked!',
+      mochaIdle:"🩷 Mocha's love keeps your revive charged.",
+      nothingToWipe:'Nothing to wipe yet!',
+      noObstacles:'No obstacles to break right now!',
+      cloudTidy:'🧹 Cloud tidied up the board!',
+      goldBoost:'💰 Gold Booster active — 2x gold for 10s!',
+      comboAccel:'⚡ Combo Accelerator — faster skill charge for 15s!',
+      bonusGold:'🎡 +60 bonus gold!',
+      bonusMoves:'🎡 +5 bonus moves!',
+      warmthBreeze:'🧡 A gentle breeze of warmth (+30)!',
+      forestGems:(n)=>'🧲 Forest collected all gems (+'+n+' warmth)!',
+      skillUsed:(catName,skillName)=>'✨ '+catName+' used '+skillName+'!',
+      furniturePlaced:(fName,catName)=>'📦 '+fName+' placed for '+catName+'!',
+      catJoined:(catName)=>'🎉 '+catName+' joined your sanctuary!',
+    },
+  },
+  ko: {
+    cutscene: [
+      {title:'비 오는 날, 혼자', body:'조용히 버려진 정원 뒤편, <b>Milo</b>라는 작은 길고양이가 흠뻑 젖은 상자 안에 웅크리고 있어요 — 춥고, 배고프고, 완전히 혼자예요.'},
+      {title:'그를 발견했어요', body:'당신은 몸을 숙여 폭풍우로부터 그를 감싸줘요. 며칠 만에 처음으로 Milo는 다시 따뜻함을 느껴요 — 그리고 이제 당신을 놓아주고 싶지 않아해요.'},
+      {title:'그만의 보금자리', body:'판지 상자는 이제 없어요. 그 자리엔 따스한 햇살과 포근한 침대, 자신만의 집이 생겼죠. 이제부터 그의 이야기가 — 그리고 당신의 이야기도 — 진짜로 시작돼요.'},
+    ],
+    skip:'건너뛰기', next:'다음', begin:'시작하기',
+    tabPuzzle:'🧩 퍼즐', tabSanctuary:'🏡 보금자리',
+    tapCell:'보드에서 칸을 눌러주세요', cancel:'취소',
+    sanctuaryIntro:'🧡 퍼즐 모드에서 얻은 온기로 여기서 가구를 살 수 있어요. 가구마다 고양이를 한 마리씩 영입하고, 영입된 고양이는 방치 중에도 🪙 골드를 벌어주며 <b>동시에</b> 퍼즐 모드에서 스킬도 쓸 수 있게 해줘요!',
+    idleIncome:'방치 수입', catsRecruited:'영입한 고양이',
+    levelCompleteTitle:'🎉 레벨 클리어!', continueBtn:'계속하기',
+    lcText:(level)=>'레벨 '+level+'의 목표 점수를 달성했어요!',
+    failTitles:{moves:'⏳ 이동 횟수 소진', time:'⏰ 시간 종료!', stuck:'💥 게임 오버!'},
+    failTexts:{
+      moves:'목표 점수에 도달하기 전에 이동 횟수를 다 썼어요. 다시 도전해보세요!',
+      time:'목표 점수에 도달하기 전에 시간이 끝났어요. 다시 시도해보세요!',
+      stuck:'트레이에 있는 조각 중 보드에 놓을 수 있는 게 없어요. 게임 오버 — 이 레벨을 다시 도전해보세요!',
+    },
+    retryLevel:'다시 도전', playAgain:'다시 플레이',
+    welcomeBack:'💤 어서 오세요!', offlineDesc:'당신이 없는 동안 고양이들이 보금자리를 잘 돌봐줬어요.', yay:'좋아요!',
+    settingsTitle:'⚙️ 설정', sound:'사운드', language:'언어', progress:'진행 상황', reset:'초기화', close:'닫기',
+    soundOn:'🔊 켜짐', soundOff:'🔇 꺼짐', langBtn:'한국어',
+    howToPlay:'📖 게임 방법',
+    help:[
+      '트레이에 있는 조각을 보드로 드래그하세요.',
+      '가로줄이나 세로줄을 가득 채우면 사라지면서 점수를 얻어요.',
+      '시간이나 이동 횟수가 끝나기 전에 위에 표시된 목표 점수에 도달하세요.',
+      '줄을 없애면 고양이 게이지가 채워져요 — 빛나는 고양이를 누르면 스킬을 쓸 수 있어요.',
+      '보금자리 탭에서 온기로 가구를 사보세요 — 가구마다 고양이를 영입하고, 그 고양이는 방치 골드를 벌어주는 <b>동시에</b> 퍼즐 모드 스킬도 열어줘요.',
+    ],
+    gotIt:'알겠어요!',
+    infiniteEndedTitle:'🌟 무한 모드 종료',
+    infiniteEndedText:(score,best)=>'점수: '+score+' · 이번 주 최고 기록: '+best+' (기기 내 기록)',
+    comboAmazing:'대박!', comboTriple:'트리플!', comboDouble:'더블!', comboNice:'나이스!',
+    comboStreak:(n)=>'콤보 x'+n+'!',
+    modeInfinite:(score)=>'무한 모드 · 점수 <b>'+score+'</b>',
+    modeLevel:(level,ls,ts)=>'레벨 <b>'+level+'</b> · '+ls+' / '+ts,
+    movesLabel:(m)=>'이동: <b id="movesVal">'+m+'</b>',
+    clearsInfinite:'♾️ 계속 줄을 없애보세요 — 제한 없음!',
+    clearsTargetReached:'🎉 목표 달성!',
+    clearsRemaining:(remaining,est)=>'🎯 '+remaining+'점 남음 — 약 '+est+'번 더 지우면 돼요!',
+    owned:'보유 중 ✓', buy:(cost)=>'구매 🧡 '+cost,
+    resetConfirm:'모든 진행 상황을 초기화할까요? 되돌릴 수 없어요.',
+    catSkillName:{ milo:'3x3 앞발 펀치', cleo:'컬러 와이프', leo:'십자 레이저', tux:'골드 부스터', blue:'얼음 브레이커', coco:'콤보 가속기', mocha:'나인 라이브즈 부활', cloud:'보드 셔플', oliver:'무브 익스텐더', forest:'온기 자석' },
+    furnitureName:['캣타워 박스','포근한 쿠션','놀이 터널','고급 소파','대리석 쿨매트','나무 스크래처','깃털 낚싯대','벨벳 침대','운동용 쳇바퀴','대형 캣트리'],
+    furniturePerk:['방치 골드 +1/틱','Cleo 영입','Leo 영입','Tux 영입','Blue 영입','Coco 영입','Mocha 영입','Cloud 영입','Oliver 영입','Forest 영입'],
+    toast:{
+      gemWarmth:(n)=>'✨ 보석 온기 +'+n+'!',
+      mochaRevive:'💗 Mocha가 나인 라이브즈 부활을 사용했어요! 길이 열려요...',
+      iceAppear:'❄️ 얼음 블록이 등장해요! 실내 보호소가 넓어져요!',
+      yarnAppear:'🧶 보드에 실뭉치가 나타나요!',
+      terraceUnlock:'🌇 테라스와 야외 선룸이 열렸어요!',
+      advancedChallenges:'🏆 고난도 도전이 시작돼요 — 고양이 10마리를 모두 모아보세요!',
+      infiniteUnlocked:'🌟 500레벨 클리어! 주간 무한 모드가 열렸어요!',
+      mochaIdle:'🩷 Mocha의 사랑이 부활 기회를 채워줘요.',
+      nothingToWipe:'아직 지울 게 없어요!',
+      noObstacles:'지금은 부술 장애물이 없어요!',
+      cloudTidy:'🧹 Cloud가 보드를 정리했어요!',
+      goldBoost:'💰 골드 부스터 발동 — 10초간 골드 2배!',
+      comboAccel:'⚡ 콤보 가속기 — 15초간 스킬 충전 속도 증가!',
+      bonusGold:'🎡 보너스 골드 +60!',
+      bonusMoves:'🎡 보너스 이동 +5!',
+      warmthBreeze:'🧡 포근한 온기가 스쳐가요 (+30)!',
+      forestGems:(n)=>'🧲 Forest가 보석을 전부 모았어요 (+'+n+' 온기)!',
+      skillUsed:(catName,skillName)=>'✨ '+catName+'가 '+skillName+'을 사용했어요!',
+      furniturePlaced:(fName,catName)=>'📦 '+catName+'를 위해 '+fName+'을 놓았어요!',
+      catJoined:(catName)=>'🎉 '+catName+'가 보금자리에 합류했어요!',
+    },
+  },
+};
+function catSkillName(id){ return T().catSkillName[id]; }
+function furnitureName(i){ return T().furnitureName[i]; }
+function furniturePerk(i){ return T().furniturePerk[i]; }
+function applyI18N(){
+  const t = T();
+  document.getElementById('cutSkip').textContent = t.skip;
+  document.querySelectorAll('.slide').forEach((s,i)=>{
+    s.querySelector('h2').textContent = t.cutscene[i].title;
+    s.querySelector('p').innerHTML = t.cutscene[i].body;
+  });
+  document.getElementById('tabPuzzle').textContent = t.tabPuzzle;
+  document.getElementById('tabSanctuary').textContent = t.tabSanctuary;
+  document.getElementById('tapCellText').textContent = t.tapCell;
+  document.getElementById('cancelTarget').textContent = t.cancel;
+  document.getElementById('sanctuaryIntro').innerHTML = t.sanctuaryIntro;
+  document.getElementById('idleIncomeLabel').textContent = t.idleIncome;
+  document.getElementById('catsRecruitedLabel').textContent = t.catsRecruited;
+  document.getElementById('lcTitle').textContent = t.levelCompleteTitle;
+  document.getElementById('lcContinue').textContent = t.continueBtn;
+  document.getElementById('offlineTitle').textContent = t.welcomeBack;
+  document.getElementById('offlineDescText').textContent = t.offlineDesc;
+  document.getElementById('offlineOk').textContent = t.yay;
+  document.getElementById('settingsTitle').textContent = t.settingsTitle;
+  document.getElementById('soundLabel').textContent = t.sound;
+  document.getElementById('langLabel').textContent = t.language;
+  document.getElementById('progressLabel').textContent = t.progress;
+  document.getElementById('resetBtn').textContent = t.reset;
+  document.getElementById('settingsClose').textContent = t.close;
+  document.getElementById('soundToggle').textContent = state.soundOn ? t.soundOn : t.soundOff;
+  document.getElementById('langToggle').textContent = t.langBtn;
+  document.getElementById('helpTitle').textContent = t.howToPlay;
+  t.help.forEach((h,i)=>{ document.getElementById('help'+i+'Text').innerHTML = h; });
+  document.getElementById('helpClose').textContent = t.gotIt;
+}
 
 /* ---------------- data ---------------- */
 const COLORS = ['#FF9F9F','#FFC98B','#FFE985','#A7E3A0','#9CD2E8','#C6A8E8','#FFA8CE'];
@@ -611,7 +798,7 @@ function placePieceAt(trayIdx,row,col){
   const gain = computeScoreGain(cells.length, result);
   applyRewards(gain, result);
   showScorePopup(gain, row, col);
-  if(gemReward>0){ state.warmth += gemReward; toast('✨ +'+gemReward+' gem warmth!'); }
+  if(gemReward>0){ state.warmth += gemReward; toast(T().toast.gemWarmth(gemReward)); }
   fillGauges(result.linesCleared);
   celebrateLineClear(result);
   if(Math.random()<0.14 && state.gems.length<2) spawnGem();
@@ -751,12 +938,13 @@ function applyShake(){
   }
 }
 function comboMessage(linesCleared, streak){
-  if(linesCleared>=4) return {text:'AMAZING!', size:36};
-  if(linesCleared===3) return {text:'TRIPLE!', size:32};
-  if(linesCleared===2) return {text:'DOUBLE!', size:28};
-  if(streak>=6) return {text:'COMBO x'+streak+'!', size:30};
-  if(streak>=3) return {text:'COMBO x'+streak+'!', size:25};
-  return {text:'NICE!', size:22};
+  const t = T();
+  if(linesCleared>=4) return {text:t.comboAmazing, size:36};
+  if(linesCleared===3) return {text:t.comboTriple, size:32};
+  if(linesCleared===2) return {text:t.comboDouble, size:28};
+  if(streak>=6) return {text:t.comboStreak(streak), size:30};
+  if(streak>=3) return {text:t.comboStreak(streak), size:25};
+  return {text:t.comboNice, size:22};
 }
 function showCombo(text,size){
   const el = document.getElementById('comboPopup');
@@ -793,7 +981,7 @@ function handleStuck(isInfinite){
     for(let r=6;r<8;r++) for(let c=0;c<8;c++){
       if(state.board[r][c].type==='block') state.board[r][c] = {type:'empty',color:0,hp:0};
     }
-    toast('💗 Mocha used Nine Lives Revive! A path opens...');
+    toast(T().toast.mochaRevive);
     SND.skill(); renderAll(); save();
     return;
   }
@@ -802,12 +990,7 @@ function handleStuck(isInfinite){
 }
 
 function levelFailed(reason){
-  const titles = {moves:'⏳ Out of Moves', time:"⏰ Time's Up!", stuck:'💥 Game Over!'};
-  const texts = {
-    moves:'You reached the move limit before hitting the target score. Give it another go!',
-    time:'The clock ran out before you hit the target score. Try again!',
-    stuck:'No piece in your tray fits on the board anymore. Game over — try this level again!',
-  };
+  const titles = T().failTitles, texts = T().failTexts;
   document.getElementById('failTitle').textContent = titles[reason] || titles.stuck;
   document.getElementById('failText').textContent = texts[reason] || texts.stuck;
   showModal('failModal');
@@ -816,7 +999,7 @@ function levelFailed(reason){
 function levelComplete(){
   const bonusGold = 40 + state.level*4, bonusWarmth = 25 + state.level*3;
   state.gold += bonusGold; state.warmth += bonusWarmth;
-  document.getElementById('lcText').textContent = 'You reached the target score for Level '+state.level+'!';
+  document.getElementById('lcText').textContent = T().lcText(state.level);
   document.getElementById('lcRewards').innerHTML = '<span>🪙 +'+bonusGold+'</span><span>🧡 +'+bonusWarmth+'</span>';
   SND.levelup();
   state.level++;
@@ -827,13 +1010,14 @@ function levelComplete(){
 }
 
 function chapterCheck(level){
-  if(level===31) toast('❄️ Ice Blocks appear! The indoor shelter expands!');
-  else if(level===60) toast('🧶 Yarn Balls appear on the board!');
-  else if(level===101) toast('🌇 Terrace & Outdoor Sunroom unlocked!');
-  else if(level===251) toast('🏆 Advanced challenges begin — collect all 10 cats!');
+  const t = T().toast;
+  if(level===31) toast(t.iceAppear);
+  else if(level===60) toast(t.yarnAppear);
+  else if(level===101) toast(t.terraceUnlock);
+  else if(level===251) toast(t.advancedChallenges);
   else if(level===501){
     state.infiniteMode = true;
-    toast('🌟 500 levels complete! Weekly Infinite Mode unlocked!');
+    toast(t.infiniteUnlocked);
   }
 }
 
@@ -843,9 +1027,9 @@ function infiniteGameOver(){
   state.leaderboard.sort((a,b)=>b.score-a.score);
   state.leaderboard = state.leaderboard.slice(0,10);
   const best = state.leaderboard[0] ? state.leaderboard[0].score : 0;
-  document.getElementById('failTitle').textContent = '🌟 Infinite Run Ended';
-  document.getElementById('failText').textContent = 'Score: '+state.infiniteScore+' · This week\'s best: '+best+' (local device only)';
-  document.getElementById('failRetry').textContent = 'Play Again';
+  document.getElementById('failTitle').textContent = T().infiniteEndedTitle;
+  document.getElementById('failText').textContent = T().infiniteEndedText(state.infiniteScore, best);
+  document.getElementById('failRetry').textContent = T().playAgain;
   showModal('failModal');
   state.infiniteScore = 0;
   newLevelBoard();
@@ -862,7 +1046,7 @@ function activateCat(catId){
   if(!cs || !cs.recruited) return;
   const cat = CATS.find(c=>c.id===catId);
   if(cat.id==='mocha'){
-    toast('🩷 Mocha\'s love keeps your revive charged.');
+    toast(T().toast.mochaIdle);
     return;
   }
   if(cs.gauge<100){ SND.error(); shakeCat(catId); return; }
@@ -911,11 +1095,11 @@ function runSkill(catId, skill, target){
     const counts=[0,0,0,0,0,0,0];
     for(let r=0;r<8;r++) for(let c=0;c<8;c++){ const cell=state.board[r][c]; if(cell.type==='block') counts[cell.color]++; }
     const maxColor = counts.indexOf(Math.max(...counts));
-    if(Math.max(...counts)===0){ toast('Nothing to wipe yet!'); return; }
+    if(Math.max(...counts)===0){ toast(T().toast.nothingToWipe); return; }
     for(let r=0;r<8;r++) for(let c=0;c<8;c++){ const cell=state.board[r][c]; if(cell.type==='block'&&cell.color===maxColor) clearCell(r,c,COLORS[cell.color]); }
   } else if(skill==='icebreak'){
     for(let r=0;r<8;r++) for(let c=0;c<8;c++){ const cell=state.board[r][c]; if(cell.type==='ice'||cell.type==='yarn') clearCell(r,c,'#ffffff'); }
-    if(cleared===0){ toast('No obstacles to break right now!'); }
+    if(cleared===0){ toast(T().toast.noObstacles); }
   } else if(skill==='shuffle'){
     const blocks=[];
     for(let r=0;r<8;r++) for(let c=0;c<8;c++) if(state.board[r][c].type==='block') blocks.push([r,c]);
@@ -927,33 +1111,33 @@ function runSkill(catId, skill, target){
       state.board[r][c] = {type:'empty',color:0,hp:0};
       clearedList.push({r,c,color});
     }
-    toast('🧹 Cloud tidied up the board!');
+    toast(T().toast.cloudTidy);
   } else if(skill==='goldboost'){
     state.goldBoostUntil = Date.now()+10000;
-    toast('💰 Gold Booster active — 2x gold for 10s!');
+    toast(T().toast.goldBoost);
   } else if(skill==='comboaccel'){
     state.gaugeBoostUntil = Date.now()+15000;
-    toast('⚡ Combo Accelerator — faster skill charge for 15s!');
+    toast(T().toast.comboAccel);
   } else if(skill==='moveext'){
-    if(state.infiniteMode){ state.gold += 60; toast('🎡 +60 bonus gold!'); }
-    else { state.movesLeft += 5; toast('🎡 +5 bonus moves!'); }
+    if(state.infiniteMode){ state.gold += 60; toast(T().toast.bonusGold); }
+    else { state.movesLeft += 5; toast(T().toast.bonusMoves); }
   } else if(skill==='warmthmagnet'){
-    if(state.gems.length===0){ state.warmth += 30; toast('🧡 A gentle breeze of warmth (+30)!'); }
+    if(state.gems.length===0){ state.warmth += 30; toast(T().toast.warmthBreeze); }
     else {
       let total=0; state.gems.forEach(g=>total+=g.reward);
       state.warmth += total; state.gems=[];
-      toast('🧲 Forest collected all gems (+'+total+' warmth)!');
+      toast(T().toast.forestGems(total));
     }
   }
   if(cleared>0){
     applyRewards(cleared*15, null);
     spawnBurst(clearedList, true);
     triggerShake(9, 200);
-    showCombo(cat.skillName.toUpperCase()+'!', 27);
+    showCombo(catSkillName(cat.id).toUpperCase()+'!', 27);
   }
   cs.gauge = 0;
   SND.skill();
-  toast('✨ '+cat.name+' used '+cat.skillName+'!');
+  toast(T().toast.skillUsed(cat.name, catSkillName(cat.id)));
   renderAll(); save();
 }
 
@@ -1054,7 +1238,7 @@ function drawCatBar(){
     el.style.setProperty('--pct', cs.gauge);
     const badge = cat.id==='mocha' ? (state.reviveAvailable?'💗':'🩶') : '';
     el.innerHTML = '<div class="inner" style="--catbg:'+cat.color+'22">'+cat.emoji+'</div>'+(badge?'<div class="badge">'+badge+'</div>':'');
-    el.title = cat.name+' — '+cat.skillName;
+    el.title = cat.name+' — '+catSkillName(cat.id);
     el.addEventListener('pointerdown', ()=>activateCat(cat.id));
     bar.appendChild(el);
   });
@@ -1065,9 +1249,9 @@ function updateHUD(){
   document.getElementById('warmthVal').textContent = state.warmth;
   document.getElementById('levelVal').textContent = state.infiniteMode ? '∞' : state.level;
   document.getElementById('modeLabel').innerHTML = state.infiniteMode
-    ? 'Infinite Mode · Score <b>'+state.infiniteScore+'</b>'
-    : 'Level <b>'+state.level+'</b> · '+state.levelScore+' / '+state.targetScore;
-  document.getElementById('movesLabel').innerHTML = state.infiniteMode ? '' : 'Moves: <b id="movesVal">'+state.movesLeft+'</b>';
+    ? T().modeInfinite(state.infiniteScore)
+    : T().modeLevel(state.level, state.levelScore, state.targetScore);
+  document.getElementById('movesLabel').innerHTML = state.infiniteMode ? '' : T().movesLabel(state.movesLeft);
   const pct = state.infiniteMode ? 0 : Math.min(100, (state.levelScore/state.targetScore)*100);
   document.getElementById('progBar').style.width = pct+'%';
   updateTimerDisplay();
@@ -1085,11 +1269,11 @@ function updateTimerDisplay(){
 
 function updateClearsHint(){
   const el = document.getElementById('clearsHint');
-  if(state.infiniteMode){ el.textContent = '♾️ Keep clearing lines — no limit!'; return; }
+  if(state.infiniteMode){ el.textContent = T().clearsInfinite; return; }
   const remaining = state.targetScore - state.levelScore;
-  if(remaining<=0){ el.textContent = '🎉 Target reached!'; return; }
+  if(remaining<=0){ el.textContent = T().clearsTargetReached; return; }
   const estClears = Math.max(1, Math.ceil(remaining/120));
-  el.textContent = '🎯 '+remaining+' pts to go — about '+estClears+(estClears===1?' more clear!':' more clears!');
+  el.textContent = T().clearsRemaining(remaining, estClears);
 }
 
 function renderSanctuary(){
@@ -1108,12 +1292,12 @@ function renderSanctuary(){
     const card = document.createElement('div');
     card.className='fCard';
     card.innerHTML = '<div class="em">'+f.emoji+'</div>'+
-      '<div class="name">'+f.name+'</div>'+
-      '<div class="cat">'+cat.name+' · '+f.perk+'</div>'+
-      '<div class="skill">✨ '+cat.skillName+'</div>'+
+      '<div class="name">'+furnitureName(i)+'</div>'+
+      '<div class="cat">'+cat.name+' · '+furniturePerk(i)+'</div>'+
+      '<div class="skill">✨ '+catSkillName(cat.id)+'</div>'+
       (owned
-        ? '<button class="owned">Owned ✓</button>'
-        : '<button class="buy" '+(state.warmth<f.cost?'disabled':'')+'>Buy 🧡 '+f.cost+'</button>');
+        ? '<button class="owned">'+T().owned+'</button>'
+        : '<button class="buy" '+(state.warmth<f.cost?'disabled':'')+'>'+T().buy(f.cost)+'</button>');
     if(!owned){
       card.querySelector('button').addEventListener('click', ()=>buyFurniture(i));
     }
@@ -1129,7 +1313,7 @@ function buyFurniture(i){
   const wasRecruited = state.cats[cat.id].recruited;
   state.cats[cat.id].recruited = true;
   SND.buy();
-  toast(wasRecruited ? '📦 '+f.name+' placed for '+cat.name+'!' : '🎉 '+cat.name+' joined your sanctuary!');
+  toast(wasRecruited ? T().toast.furniturePlaced(furnitureName(i), cat.name) : T().toast.catJoined(cat.name));
   renderAll(); save();
 }
 
@@ -1222,23 +1406,30 @@ document.querySelectorAll('.tab').forEach(btn=>{
 document.getElementById('lcContinue').addEventListener('click', ()=>{ hideModal('levelCompleteModal'); renderAll(); });
 document.getElementById('failRetry').addEventListener('click', ()=>{
   hideModal('failModal');
-  document.getElementById('failRetry').textContent='Retry Level';
+  document.getElementById('failRetry').textContent = T().retryLevel;
   newLevelBoard(); renderAll(); save();
 });
 document.getElementById('offlineOk').addEventListener('click', ()=>hideModal('offlineModal'));
 
 document.getElementById('settingsBtn').addEventListener('click', ()=>{
-  document.getElementById('soundToggle').textContent = state.soundOn ? '🔊 On' : '🔇 Off';
+  document.getElementById('soundToggle').textContent = state.soundOn ? T().soundOn : T().soundOff;
   showModal('settingsModal');
 });
 document.getElementById('settingsClose').addEventListener('click', ()=>hideModal('settingsModal'));
 document.getElementById('soundToggle').addEventListener('click', ()=>{
   state.soundOn = !state.soundOn;
-  document.getElementById('soundToggle').textContent = state.soundOn ? '🔊 On' : '🔇 Off';
+  document.getElementById('soundToggle').textContent = state.soundOn ? T().soundOn : T().soundOff;
   save();
 });
+document.getElementById('langToggle').addEventListener('click', ()=>{
+  LANG = LANG==='en' ? 'ko' : 'en';
+  try{ localStorage.setItem(LANG_KEY, LANG); }catch(e){}
+  applyI18N();
+  document.getElementById('soundToggle').textContent = state.soundOn ? T().soundOn : T().soundOff;
+  renderAll();
+});
 document.getElementById('resetBtn').addEventListener('click', ()=>{
-  if(!confirm('Reset all progress? This cannot be undone.')) return;
+  if(!confirm(T().resetConfirm)) return;
   localStorage.removeItem(SAVE_KEY);
   location.reload();
 });
@@ -1254,7 +1445,7 @@ function renderDots(){
 function showSlide(i){
   slides.forEach(s=>s.classList.remove('active'));
   slides[i].classList.add('active');
-  document.getElementById('cutNext').textContent = i===slides.length-1 ? "Let's Begin" : 'Next';
+  document.getElementById('cutNext').textContent = i===slides.length-1 ? T().begin : T().next;
   renderDots();
   setMood(i===0 ? 'sad' : 'bright');
 }
@@ -1327,7 +1518,8 @@ function init(){
     if(!state.infiniteMode) newLevelBoard();
     state.configVersion = CONFIG_VERSION;
   }
-  document.getElementById('soundToggle').textContent = state.soundOn ? '🔊 On' : '🔇 Off';
+  applyI18N();
+  document.getElementById('soundToggle').textContent = state.soundOn ? T().soundOn : T().soundOff;
 
   if(state.cutsceneShown){
     document.getElementById('cutscene').classList.add('hidden');
