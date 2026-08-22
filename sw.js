@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cat-block-haven-v17';
+const CACHE_NAME = 'cat-block-haven-v18';
 const ASSETS = ['./', './index.html', './manifest.json', './icons/icon-192.png', './icons/icon-512.png'];
 
 self.addEventListener('install', event => {
