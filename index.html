@@ -781,7 +781,7 @@ function trackForMood(mood){
   return null;
 }
 function gameplayMoodForLevel(){
-  const tier = Math.min(MUSIC_GAMEPLAY_TIERS.length-1, Math.floor((state.level-1)/30));
+  const tier = Math.min(MUSIC_GAMEPLAY_TIERS.length-1, Math.floor((state.level-1)/10));
   return 'gameplay'+tier;
 }
 function setMood(mood){
@@ -830,10 +830,10 @@ const MUSIC_INTRO_BRIGHT = {bpm:126, voices:[
     [7,4,'triangle',0.022],[2,4,'triangle',0.02],[7,4,'triangle',0.022],[7,4,'triangle',0.022],
   ],
 ]};
-/* Gameplay music comes in 6 tiers, changing every 30 stages cleared -- each tier is a different, more
+/* Gameplay music comes in 10 tiers, changing every 10 stages cleared -- each tier is a different, more
    grandly-orchestrated classical theme (not just the same tune sped up), with more voices layered in
    as the tiers rise so the music gets more elaborate alongside the stage number. */
-/* Tier 0 (stage 1-30): original bouncy C-major theme -- bright arpeggio melody with a I-V-I bass */
+/* Tier 0 (stage 1-10): original bouncy C-major theme -- bright arpeggio melody with a I-V-I bass */
 const MUSIC_GAMEPLAY_T0 = {bpm:132, voices:[
   [ // bright bouncy theme (C major arpeggio, answered higher, resolves back to tonic)
     [0,0.5,'triangle',0.032],[4,0.5,'triangle',0.03],[7,0.5,'triangle',0.032],[4,0.5,'triangle',0.03],
@@ -848,9 +848,25 @@ const MUSIC_GAMEPLAY_T0 = {bpm:132, voices:[
     [-8,4.5,'triangle',0.018],[-1,4.5,'triangle',0.018],
   ],
 ]};
-/* Tier 1 (stage 31-60): Handel, "Hallelujah Chorus" (Messiah) -- the famous repeated-note "Hallelujah" call
+/* Tier 1 (stage 11-20): Mozart, "Eine kleine Nachtmusik" -- the famous G-major rising-arpeggio "call"
+   answered by a lighter descending "response" */
+const MUSIC_GAMEPLAY_T1 = {bpm:116, voices:[
+  [ // call (rising G major arpeggio, punchy) then a softer descending answer
+    [-5,0.5,'square',0.045],[2,0.5,'square',0.042],[7,0.5,'square',0.045],[11,0.5,'square',0.042],[14,2,'square',0.05],
+    [14,0.25,'triangle',0.03],[12,0.25,'triangle',0.03],[11,0.25,'triangle',0.03],[9,0.25,'triangle',0.03],[7,0.25,'triangle',0.03],[6,0.25,'triangle',0.03],[7,2,'triangle',0.034],[null,0.5],
+  ],
+  [ // walking G-D pedal bass
+    [-5,1,'sine',0.028],[2,1,'sine',0.026],[-5,1,'sine',0.028],[2,1,'sine',0.026],
+    [-5,1,'sine',0.028],[2,1,'sine',0.026],[-5,1,'sine',0.028],[2,1,'sine',0.026],
+  ],
+  [ // light staccato inner accompaniment
+    [2,1,'triangle',0.015],[11,1,'triangle',0.015],[2,1,'triangle',0.015],[11,1,'triangle',0.015],
+    [2,1,'triangle',0.015],[11,1,'triangle',0.015],[2,1,'triangle',0.015],[11,1,'triangle',0.015],
+  ],
+]};
+/* Tier 2 (stage 21-30): Handel, "Hallelujah Chorus" (Messiah) -- the famous repeated-note "Hallelujah" call
    and response, D major, with a soprano descant that only enters on the final phrase */
-const MUSIC_GAMEPLAY_T1 = {bpm:108, voices:[
+const MUSIC_GAMEPLAY_T2 = {bpm:108, voices:[
   [ // "Hallelujah" call-and-response, moving I - IV - V - I
     [2,0.5,'triangle',0.034],[2,0.5,'triangle',0.032],[2,0.5,'triangle',0.032],[2,2,'triangle',0.036],[null,0.5],
     [7,0.5,'triangle',0.034],[7,0.5,'triangle',0.032],[7,0.5,'triangle',0.032],[7,2,'triangle',0.036],[null,0.5],
@@ -867,8 +883,33 @@ const MUSIC_GAMEPLAY_T1 = {bpm:108, voices:[
     [null,12],[14,4,'triangle',0.02],
   ],
 ]};
-/* Tier 2 (stage 61-90): Vivaldi, "Spring" (The Four Seasons) -- fast bright E-major virtuosic figuration */
-const MUSIC_GAMEPLAY_T2 = {bpm:152, voices:[
+/* Tier 3 (stage 31-40): Rossini, "William Tell Overture" finale -- the famous fast galloping fanfare */
+const MUSIC_GAMEPLAY_T3 = {bpm:180, voices:[
+  [ // galloping "da-da-DUM" fanfare
+    [0,0.25,'square',0.035],[0,0.25,'square',0.032],[7,0.5,'square',0.045],
+    [0,0.25,'square',0.035],[0,0.25,'square',0.032],[7,0.5,'square',0.045],
+    [9,0.25,'square',0.038],[9,0.25,'square',0.034],[16,0.5,'square',0.048],
+    [9,0.25,'square',0.038],[9,0.25,'square',0.034],[16,0.5,'square',0.048],
+  ],
+  [ // galloping root-fifth bass
+    [-12,0.25,'sine',0.03],[-12,0.25,'sine',0.028],[-5,0.5,'sine',0.032],
+    [-12,0.25,'sine',0.03],[-12,0.25,'sine',0.028],[-5,0.5,'sine',0.032],
+    [-3,0.25,'sine',0.03],[-3,0.25,'sine',0.028],[4,0.5,'sine',0.032],
+    [-3,0.25,'sine',0.03],[-3,0.25,'sine',0.028],[4,0.5,'sine',0.032],
+  ],
+  [ // fifth doubling for extra brightness
+    [7,0.25,'triangle',0.018],[7,0.25,'triangle',0.016],[14,0.5,'triangle',0.02],
+    [7,0.25,'triangle',0.018],[7,0.25,'triangle',0.016],[14,0.5,'triangle',0.02],
+    [9,0.25,'triangle',0.018],[9,0.25,'triangle',0.016],[16,0.5,'triangle',0.02],
+    [9,0.25,'triangle',0.018],[9,0.25,'triangle',0.016],[16,0.5,'triangle',0.02],
+  ],
+  [ // sparkling high accent on the last hit of every other group
+    [null,0.75],[19,0.25,'triangle',0.02],[null,0.75],[19,0.25,'triangle',0.02],
+    [null,0.75],[21,0.25,'triangle',0.02],[null,0.75],[21,0.25,'triangle',0.02],
+  ],
+]};
+/* Tier 4 (stage 41-50): Vivaldi, "Spring" (The Four Seasons) -- fast bright E-major virtuosic figuration */
+const MUSIC_GAMEPLAY_T4 = {bpm:152, voices:[
   [ // running triadic figure
     [4,0.25,'triangle',0.03],[6,0.25,'triangle',0.028],[8,0.25,'triangle',0.03],[9,0.25,'triangle',0.028],
     [11,0.25,'triangle',0.03],[9,0.25,'triangle',0.028],[8,0.25,'triangle',0.03],[6,0.25,'triangle',0.028],
@@ -892,8 +933,28 @@ const MUSIC_GAMEPLAY_T2 = {bpm:152, voices:[
     [23,0.5,'triangle',0.014],[20,0.5,'triangle',0.013],[16,0.5,'triangle',0.014],[13,0.5,'triangle',0.013],
   ],
 ]};
-/* Tier 3 (stage 91-120): Wagner, "Ride of the Valkyries" -- bombastic dotted-rhythm brass horn call */
-const MUSIC_GAMEPLAY_T3 = {bpm:140, voices:[
+/* Tier 5 (stage 51-60): Grieg, "In the Hall of the Mountain King" (Peer Gynt) -- a creeping minor-key
+   ostinato that keeps climbing a step higher each repeat, evoking the piece's famous slow build */
+const MUSIC_GAMEPLAY_T5 = {bpm:132, voices:[
+  [ // rising ostinato motif, transposed a step higher on each repeat
+    [-10,0.25,'sawtooth',0.03],[-8,0.25,'sawtooth',0.03],[-7,0.25,'sawtooth',0.03],[-5,0.25,'sawtooth',0.03],[-3,1,'sawtooth',0.032],
+    [-8,0.25,'sawtooth',0.03],[-7,0.25,'sawtooth',0.03],[-5,0.25,'sawtooth',0.03],[-3,0.25,'sawtooth',0.03],[-1,1,'sawtooth',0.032],
+    [-5,0.25,'sawtooth',0.032],[-3,0.25,'sawtooth',0.032],[-1,0.25,'sawtooth',0.032],[1,0.25,'sawtooth',0.032],[3,1,'sawtooth',0.034],
+    [-1,0.25,'sawtooth',0.034],[1,0.25,'sawtooth',0.034],[3,0.25,'sawtooth',0.034],[5,0.25,'sawtooth',0.034],[7,1,'sawtooth',0.038],
+  ],
+  [ // low ominous pedal, one step per repeat of the motif
+    [-15,2,'sawtooth',0.03],[-13,2,'sawtooth',0.03],[-10,2,'sawtooth',0.032],[-6,2,'sawtooth',0.035],
+  ],
+  [ // parallel minor thirds under the melody
+    [-13,2,'triangle',0.018],[-11,2,'triangle',0.018],[-8,2,'triangle',0.018],[-4,2,'triangle',0.02],
+  ],
+  [ // tremolo rumble that only kicks in for the climactic final repeat
+    [null,4],[-15,0.25,'sawtooth',0.02],[-13,0.25,'sawtooth',0.02],[-15,0.25,'sawtooth',0.02],[-13,0.25,'sawtooth',0.02],
+    [-15,0.25,'sawtooth',0.022],[-13,0.25,'sawtooth',0.022],[-15,0.25,'sawtooth',0.024],[-13,0.25,'sawtooth',0.024],[null,2],
+  ],
+]};
+/* Tier 6 (stage 61-70): Wagner, "Ride of the Valkyries" -- bombastic dotted-rhythm brass horn call */
+const MUSIC_GAMEPLAY_T6 = {bpm:140, voices:[
   [ // horn-call theme, rising then answered falling
     [10,0.75,'sawtooth',0.04],[14,0.25,'sawtooth',0.035],[17,0.75,'sawtooth',0.04],[14,0.25,'sawtooth',0.035],[22,1.5,'sawtooth',0.045],[null,0.5],
     [17,0.75,'sawtooth',0.04],[14,0.25,'sawtooth',0.035],[10,0.75,'sawtooth',0.04],[7,0.25,'sawtooth',0.035],[5,1.5,'sawtooth',0.04],[null,0.5],
@@ -912,8 +973,27 @@ const MUSIC_GAMEPLAY_T3 = {bpm:140, voices:[
     [null,4],
   ],
 ]};
-/* Tier 4 (stage 121-150): Beethoven, Symphony No.5 finale -- the triumphant C-major fanfare theme */
-const MUSIC_GAMEPLAY_T4 = {bpm:126, voices:[
+/* Tier 7 (stage 71-80): Orff, "O Fortuna" (Carmina Burana) -- pounding stabbing chords, D minor choral power */
+const MUSIC_GAMEPLAY_T7 = {bpm:100, voices:[
+  [ // the famous repeated-note rising choral figure
+    [2,0.5,'square',0.05],[2,0.5,'square',0.048],[2,0.5,'square',0.05],[4,0.5,'square',0.048],
+    [5,1,'square',0.055],[4,0.5,'square',0.048],[2,1.5,'square',0.052],
+  ],
+  [ // pounding low D pedal, stabbing on every beat
+    [-10,0.5,'sawtooth',0.04],[-10,0.5,'sawtooth',0.038],[-10,0.5,'sawtooth',0.04],[-10,0.5,'sawtooth',0.038],
+    [-10,1,'sawtooth',0.045],[-10,0.5,'sawtooth',0.038],[-10,1.5,'sawtooth',0.042],
+  ],
+  [ // choir harmony reinforcing the chords
+    [5,0.5,'triangle',0.02],[5,0.5,'triangle',0.019],[5,0.5,'triangle',0.02],[7,0.5,'triangle',0.019],
+    [9,1,'triangle',0.022],[7,0.5,'triangle',0.019],[5,1.5,'triangle',0.021],
+  ],
+  [ // low timpani doubling the pounding rhythm
+    [-15,0.5,'sawtooth',0.025],[-15,0.5,'sawtooth',0.024],[-15,0.5,'sawtooth',0.025],[-15,0.5,'sawtooth',0.024],
+    [-15,1,'sawtooth',0.028],[-15,0.5,'sawtooth',0.024],[-15,1.5,'sawtooth',0.026],
+  ],
+]};
+/* Tier 8 (stage 81-90): Beethoven, Symphony No.5 finale -- the triumphant C-major fanfare theme */
+const MUSIC_GAMEPLAY_T8 = {bpm:126, voices:[
   [ // triumphant rising fanfare, answered, repeated, then a climax
     [0,0.5,'square',0.032],[4,0.5,'square',0.03],[7,0.5,'square',0.032],[12,1.5,'square',0.036],
     [11,0.5,'square',0.03],[9,0.5,'square',0.028],[7,0.5,'square',0.03],[4,1.5,'square',0.032],
@@ -934,10 +1014,10 @@ const MUSIC_GAMEPLAY_T4 = {bpm:126, voices:[
     [-12,1,'sine',0.025],[null,1],[-12,1,'sine',0.025],[null,1],[-12,1,'sine',0.025],[null,1],
   ],
 ]};
-/* Tier 5 (stage 151+): Richard Strauss, "Also sprach Zarathustra" opening fanfare -- the most epic/monumental
+/* Tier 9 (stage 91+): Richard Strauss, "Also sprach Zarathustra" opening fanfare -- the most epic/monumental
    tier: a slow spacious C-G-C-E trumpet call over a sustained open-fifth drone, with a timpani roll and a
    shimmering high entrance right at the climax */
-const MUSIC_GAMEPLAY_T5 = {bpm:72, voices:[
+const MUSIC_GAMEPLAY_T9 = {bpm:72, voices:[
   [ // trumpet fanfare
     [0,2,'square',0.05],[7,2,'square',0.05],[12,2,'square',0.055],[16,3,'square',0.06],[null,1],
   ],
@@ -956,7 +1036,7 @@ const MUSIC_GAMEPLAY_T5 = {bpm:72, voices:[
     [null,6],[24,0.5,'triangle',0.022],[28,0.5,'triangle',0.022],[31,0.5,'triangle',0.022],[28,0.5,'triangle',0.022],[24,1,'triangle',0.026],[null,1],
   ],
 ]};
-const MUSIC_GAMEPLAY_TIERS = [MUSIC_GAMEPLAY_T0, MUSIC_GAMEPLAY_T1, MUSIC_GAMEPLAY_T2, MUSIC_GAMEPLAY_T3, MUSIC_GAMEPLAY_T4, MUSIC_GAMEPLAY_T5];
+const MUSIC_GAMEPLAY_TIERS = [MUSIC_GAMEPLAY_T0, MUSIC_GAMEPLAY_T1, MUSIC_GAMEPLAY_T2, MUSIC_GAMEPLAY_T3, MUSIC_GAMEPLAY_T4, MUSIC_GAMEPLAY_T5, MUSIC_GAMEPLAY_T6, MUSIC_GAMEPLAY_T7, MUSIC_GAMEPLAY_T8, MUSIC_GAMEPLAY_T9];
 /* fast dissonant semitone-clash pulse -- plays while the stage clock is about to run out */
 const MUSIC_URGENT = {bpm:200, voices:[
   [
@@ -1758,6 +1838,7 @@ document.getElementById('cancelTarget').addEventListener('click', cancelTargetin
 /* ---------------- tabs / modals / settings ---------------- */
 document.querySelectorAll('.tab').forEach(btn=>{
   btn.addEventListener('click', ()=>{
+    if(btn.dataset.tab!=='puzzle') cancelTargeting();
     document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
     document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
     btn.classList.add('active');
