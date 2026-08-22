@@ -280,7 +280,7 @@
         <div id="comboPopup"></div>
         <div id="scorePopup"></div>
       </div>
-      <div id="trayBar"><button id="rerollBtn">🎲 <span id="rerollCost">20</span></button></div>
+      <div id="trayBar"><button id="rerollBtn">🎲 <span id="rerollCost">5</span></button></div>
       <div id="tray">
         <canvas class="trayPiece" width="100" height="100" data-idx="0"></canvas>
         <canvas class="trayPiece" width="100" height="100" data-idx="1"></canvas>
@@ -670,7 +670,7 @@ function freshState(){
   return {
     gold:20, warmth:0, level:1, levelScore:0, movesLeft:0, timeLeft:0, targetScore:0,
     board: null, tray: [null,null,null],
-    cats, furniture, roomItems, gems:[], comboStreak:0,
+    cats, furniture, roomItems, gems:[], comboStreak:0, rerollsLeft:5,
     reviveAvailable:true, infiniteMode:false, infiniteScore:0,
     goldBoostUntil:0, gaugeBoostUntil:0,
     leaderboard:[], weekStart: Date.now(),
@@ -1152,6 +1152,7 @@ function placePieceAt(trayIdx,row,col){
   showScorePopup(gain, row, col);
   if(gemReward>0){ state.warmth += gemReward; toast(T().toast.gemWarmth(gemReward)); }
   fillGauges(result.linesCleared);
+  if(result.linesCleared>0) state.rerollsLeft = (state.rerollsLeft||0) + result.linesCleared;
   celebrateLineClear(result);
   if(Math.random()<0.14 && state.gems.length<2) spawnGem();
 
@@ -1379,6 +1380,7 @@ function levelComplete(){
   SND.levelup();
   if(perfect){ SND.skill(); triggerShake(9,220); }
   else triggerShake(5,150);
+  state.rerollsLeft = (state.rerollsLeft||0) + 1;
   state.level++;
   chapterCheck(state.level);
   newLevelBoard();
@@ -1623,12 +1625,10 @@ function drawCatBar(){
   });
 }
 
-function rerollCost(){ return 20 + Math.floor(state.level/5)*5; }
 function rerollTray(){
   if(dragState) return;
-  const cost = rerollCost();
-  if(state.gold < cost) return;
-  state.gold -= cost;
+  if(!state.rerollsLeft || state.rerollsLeft<=0) return;
+  state.rerollsLeft--;
   state.tray = [randomPiece(), randomPiece(), randomPiece()];
   SND.buy();
   toast(T().toast.trayRerolled);
@@ -1644,8 +1644,8 @@ function updateHUD(){
   document.getElementById('movesLabel').innerHTML = state.infiniteMode ? '' : T().movesLabel(state.movesLeft);
   const pct = state.infiniteMode ? 0 : Math.min(100, (state.levelScore/state.targetScore)*100);
   document.getElementById('progBar').style.width = pct+'%';
-  document.getElementById('rerollCost').textContent = rerollCost();
-  document.getElementById('rerollBtn').disabled = state.gold < rerollCost();
+  document.getElementById('rerollCost').textContent = state.rerollsLeft||0;
+  document.getElementById('rerollBtn').disabled = !state.rerollsLeft || state.rerollsLeft<=0;
   document.getElementById('levelDiff').textContent = state.infiniteMode ? '' : difficultyTier(state.level);
   updateTimerDisplay();
   updateClearsHint();
@@ -2021,6 +2021,7 @@ function init(){
   state = loaded || freshState();
   if(!state.board) newLevelBoard();
   if(!state.roomItems){ const ri={}; ROOM_ITEMS.forEach(r=>{ ri[r.id]=false; }); state.roomItems = ri; }
+  if(state.rerollsLeft===undefined) state.rerollsLeft = 5;
   if(state.configVersion !== CONFIG_VERSION){
     if(!state.infiniteMode) newLevelBoard();
     state.configVersion = CONFIG_VERSION;
