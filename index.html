@@ -40,6 +40,7 @@
   .resource .em{font-size:14px;}
   #levelBadge{margin-left:auto;background:var(--accent);color:#fff;border-radius:14px;padding:5px 12px;
     font-weight:800;font-size:13px;box-shadow:0 2px 4px rgba(0,0,0,.12);}
+  #levelDiff{font-size:11px;}
   #settingsBtn,#helpBtn{background:none;border:none;font-size:20px;padding:2px 4px;cursor:pointer;}
 
   /* tabs */
@@ -105,6 +106,11 @@
 
   #tray{display:flex;justify-content:space-around;align-items:center;margin-top:10px;flex:0 0 auto;}
   .trayPiece{touch-action:none;cursor:grab;}
+  #trayBar{display:flex;justify-content:center;margin-top:8px;flex:0 0 auto;}
+  #rerollBtn{border:none;border-radius:14px;padding:6px 14px;font-weight:800;font-size:12.5px;
+    background:var(--accent2);color:#fff;cursor:pointer;box-shadow:0 3px 8px rgba(0,0,0,.15);
+    display:flex;align-items:center;gap:5px;}
+  #rerollBtn:disabled{background:#ddd;color:#999;cursor:default;box-shadow:none;}
 
   /* sanctuary view */
   #sanctuaryIntro{font-size:12px;line-height:1.5;color:var(--sub);background:rgba(255,255,255,.55);
@@ -173,10 +179,22 @@
   /* modals */
   .modal{position:absolute;inset:0;background:rgba(40,26,18,.55);display:flex;align-items:center;justify-content:center;z-index:60;}
   .modal .card{background:var(--card2);border-radius:22px;padding:26px 22px;width:82%;text-align:center;
-    box-shadow:0 12px 30px rgba(0,0,0,.3);}
+    box-shadow:0 12px 30px rgba(0,0,0,.3);position:relative;}
   .modal .card h2{margin:0 0 6px;font-size:20px;}
   .modal .card p{font-size:13px;color:var(--sub);margin:4px 0 14px;line-height:1.5;}
-  .modal .rewards{display:flex;justify-content:center;gap:14px;margin-bottom:16px;font-weight:800;font-size:14px;}
+  .modal .rewards{display:flex;flex-wrap:wrap;justify-content:center;gap:10px 14px;margin-bottom:16px;font-weight:800;font-size:14px;}
+  #levelCompleteModal.perfect .card{animation:perfectPulse .5s ease-out;
+    box-shadow:0 0 40px 10px rgba(255,201,90,.55), 0 12px 30px rgba(0,0,0,.3);}
+  @keyframes perfectPulse{0%{transform:scale(.82);}55%{transform:scale(1.05);}100%{transform:scale(1);}}
+  .lcSparkle{position:absolute;left:50%;top:50%;font-size:20px;pointer-events:none;
+    animation:lcSparkleFloat 1s ease-out forwards;}
+  @keyframes lcSparkleFloat{
+    0%{transform:translate(-50%,-50%) scale(.5);opacity:0;}
+    15%{opacity:1;}
+    100%{transform:translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1.3);opacity:0;}
+  }
+  .perfectBadge{display:inline-block;font-weight:800;font-size:12.5px;color:#B8722A;
+    background:linear-gradient(180deg,#FFE9B8,#FFD37A);padding:4px 10px;border-radius:10px;}
   .modal button{border:none;border-radius:14px;padding:11px 0;width:100%;font-weight:800;font-size:14.5px;
     cursor:pointer;background:var(--accent);color:#fff;box-shadow:0 4px 10px rgba(0,0,0,.15);}
   .modal button.secondary{background:none;color:var(--sub);box-shadow:none;margin-top:6px;font-size:12.5px;padding:6px 0;}
@@ -241,7 +259,7 @@
   <div id="topbar">
     <div class="resource"><span class="em">🪙</span><span id="goldVal">0</span></div>
     <div class="resource"><span class="em">🧡</span><span id="warmthVal">0</span></div>
-    <div id="levelBadge">Lv.<span id="levelVal">1</span></div>
+    <div id="levelBadge">Lv.<span id="levelVal">1</span> <span id="levelDiff"></span></div>
     <button id="helpBtn">❓</button>
     <button id="settingsBtn">⚙️</button>
   </div>
@@ -264,6 +282,7 @@
         <div id="comboPopup"></div>
         <div id="scorePopup"></div>
       </div>
+      <div id="trayBar"><button id="rerollBtn">🎲 <span id="rerollCost">20</span></button></div>
       <div id="tray">
         <canvas class="trayPiece" width="100" height="100" data-idx="0"></canvas>
         <canvas class="trayPiece" width="100" height="100" data-idx="1"></canvas>
@@ -383,6 +402,10 @@ const I18N = {
     idleIncome:'Idle income', catsRecruited:'Cats recruited',
     levelCompleteTitle:'🎉 Level Complete!', continueBtn:'Continue',
     lcText:(level)=>'You reached the target score for Level '+level+'!',
+    lcTitlePerfect:'🌟 PERFECT CLEAR!',
+    lcTextPerfect:(level)=>'You crushed Level '+level+' with moves to spare!',
+    perfectBadge:'✨ Perfect bonus x1.5',
+    diffEasy:'🟢', diffMedium:'🟡', diffTricky:'🟠', diffHard:'🔴',
     failTitles:{moves:'⏳ Out of Moves', time:"⏰ Time's Up!", stuck:'💥 Game Over!'},
     failTexts:{
       moves:'You reached the move limit before hitting the target score. Give it another go!',
@@ -419,6 +442,7 @@ const I18N = {
     furniturePerk:['+1 idle gold/tick','Recruits Cleo','Recruits Leo','Recruits Tux','Recruits Blue','Recruits Coco','Recruits Mocha','Recruits Cloud','Recruits Oliver','Recruits Forest'],
     toast:{
       gemWarmth:(n)=>'✨ +'+n+' gem warmth!',
+      trayRerolled:'🎲 New pieces!',
       mochaRevive:'💗 Mocha used Nine Lives Revive! A path opens...',
       iceAppear:'❄️ Ice Blocks appear! The indoor shelter expands!',
       yarnAppear:'🧶 Yarn Balls appear on the board!',
@@ -457,6 +481,10 @@ const I18N = {
     idleIncome:'방치 수입', catsRecruited:'영입한 고양이',
     levelCompleteTitle:'🎉 레벨 클리어!', continueBtn:'계속하기',
     lcText:(level)=>'레벨 '+level+'의 목표 점수를 달성했어요!',
+    lcTitlePerfect:'🌟 퍼펙트 클리어!',
+    lcTextPerfect:(level)=>'레벨 '+level+'을(를) 여유 있게 클리어했어요!',
+    perfectBadge:'✨ 퍼펙트 보너스 x1.5',
+    diffEasy:'🟢', diffMedium:'🟡', diffTricky:'🟠', diffHard:'🔴',
     failTitles:{moves:'⏳ 이동 횟수 소진', time:'⏰ 시간 종료!', stuck:'💥 게임 오버!'},
     failTexts:{
       moves:'목표 점수에 도달하기 전에 이동 횟수를 다 썼어요. 다시 도전해보세요!',
@@ -493,6 +521,7 @@ const I18N = {
     furniturePerk:['방치 골드 +1/틱','Cleo 영입','Leo 영입','Tux 영입','Blue 영입','Coco 영입','Mocha 영입','Cloud 영입','Oliver 영입','Forest 영입'],
     toast:{
       gemWarmth:(n)=>'✨ 보석 온기 +'+n+'!',
+      trayRerolled:'🎲 새 조각이 나왔어요!',
       mochaRevive:'💗 Mocha가 나인 라이브즈 부활을 사용했어요! 길이 열려요...',
       iceAppear:'❄️ 얼음 블록이 등장해요! 실내 보호소가 넓어져요!',
       yarnAppear:'🧶 보드에 실뭉치가 나타나요!',
@@ -1068,6 +1097,13 @@ function levelConfig(level){
   if(level>=60) yarnCount = Math.min(4, Math.floor((level-60)/25)+1);
   return {targetScore, moveLimit, timeLimit, iceCount, yarnCount};
 }
+function difficultyTier(level){
+  const cfg = levelConfig(level);
+  if(cfg.yarnCount>0) return T().diffHard;
+  if(cfg.iceCount>0) return T().diffTricky;
+  if(level>=15) return T().diffMedium;
+  return T().diffEasy;
+}
 
 function pickShapeIdx(){
   let idx;
@@ -1342,17 +1378,42 @@ function levelFailed(reason){
   showModal('failModal');
 }
 
+function spawnLcSparkles(){
+  const card = document.querySelector('#levelCompleteModal .card');
+  card.querySelectorAll('.lcSparkle').forEach(el=>el.remove());
+  const icons = ['✨','⭐','🎉','💫'];
+  for(let i=0;i<10;i++){
+    const s = document.createElement('span');
+    s.className = 'lcSparkle';
+    s.textContent = icons[Math.floor(Math.random()*icons.length)];
+    const angle = Math.random()*Math.PI*2, dist = 60+Math.random()*50;
+    s.style.setProperty('--dx', Math.cos(angle)*dist+'px');
+    s.style.setProperty('--dy', Math.sin(angle)*dist+'px');
+    s.style.animationDelay = (Math.random()*0.15)+'s';
+    card.appendChild(s);
+  }
+}
 function levelComplete(){
-  const bonusGold = 40 + state.level*4, bonusWarmth = 25 + state.level*3;
+  const cfg = levelConfig(state.level);
+  const moveRatio = (!state.infiniteMode && cfg.moveLimit>0) ? state.movesLeft/cfg.moveLimit : 0;
+  const perfect = !state.infiniteMode && moveRatio>=0.4;
+  const mult = perfect ? 1.5 : 1;
+  const bonusGold = Math.round((40 + state.level*4)*mult), bonusWarmth = Math.round((25 + state.level*3)*mult);
   state.gold += bonusGold; state.warmth += bonusWarmth;
-  document.getElementById('lcText').textContent = T().lcText(state.level);
-  document.getElementById('lcRewards').innerHTML = '<span>🪙 +'+bonusGold+'</span><span>🧡 +'+bonusWarmth+'</span>';
+  document.getElementById('lcTitle').textContent = perfect ? T().lcTitlePerfect : T().levelCompleteTitle;
+  document.getElementById('lcText').textContent = perfect ? T().lcTextPerfect(state.level) : T().lcText(state.level);
+  document.getElementById('lcRewards').innerHTML = '<span>🪙 +'+bonusGold+'</span><span>🧡 +'+bonusWarmth+'</span>'
+    + (perfect ? '<span class="perfectBadge">'+T().perfectBadge+'</span>' : '');
+  document.getElementById('levelCompleteModal').classList.toggle('perfect', perfect);
   SND.levelup();
+  if(perfect){ SND.skill(); triggerShake(9,220); }
+  else triggerShake(5,150);
   state.level++;
   chapterCheck(state.level);
   newLevelBoard();
   save();
   showModal('levelCompleteModal');
+  if(perfect) spawnLcSparkles();
 }
 
 function chapterCheck(level){
@@ -1591,6 +1652,17 @@ function drawCatBar(){
   });
 }
 
+function rerollCost(){ return 20 + Math.floor(state.level/5)*5; }
+function rerollTray(){
+  if(dragState) return;
+  const cost = rerollCost();
+  if(state.gold < cost) return;
+  state.gold -= cost;
+  state.tray = [randomPiece(), randomPiece(), randomPiece()];
+  SND.buy();
+  toast(T().toast.trayRerolled);
+  renderAll(); save();
+}
 function updateHUD(){
   document.getElementById('goldVal').textContent = state.gold;
   document.getElementById('warmthVal').textContent = state.warmth;
@@ -1601,6 +1673,9 @@ function updateHUD(){
   document.getElementById('movesLabel').innerHTML = state.infiniteMode ? '' : T().movesLabel(state.movesLeft);
   const pct = state.infiniteMode ? 0 : Math.min(100, (state.levelScore/state.targetScore)*100);
   document.getElementById('progBar').style.width = pct+'%';
+  document.getElementById('rerollCost').textContent = rerollCost();
+  document.getElementById('rerollBtn').disabled = state.gold < rerollCost();
+  document.getElementById('levelDiff').textContent = state.infiniteMode ? '' : difficultyTier(state.level);
   updateTimerDisplay();
   updateClearsHint();
 }
@@ -1820,6 +1895,7 @@ document.querySelectorAll('.trayPiece').forEach(canvas=>{
   canvas.addEventListener('pointerup', e=>{ endDrag(); });
   canvas.addEventListener('pointercancel', ()=>{ dragState=null; previewCells=null; drawTray(); drawBoard(); });
 });
+document.getElementById('rerollBtn').addEventListener('click', rerollTray);
 window.addEventListener('pointermove', e=>{ if(dragState) moveDrag(e.clientX,e.clientY); });
 window.addEventListener('pointerup', e=>{ if(dragState) endDrag(); });
 
